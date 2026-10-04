@@ -1,0 +1,66 @@
+{% extends 'dashboard/atlas_shell.html' %}
+{% load static %}
+
+{% block title %}Shortlisting{% endblock %}
+{% block breadcrumb %}<a href="{{ workspace_url }}">Workspace</a><b>/</b>{{ job.title }}<b>/</b>Shortlist{% endblock %}
+
+{% block dashboard_content %}
+<link rel="stylesheet" href="{% static 'workspace/css/application-shortlist.css' %}?v=3">
+{{ shortlist_data|json_script:"shortlist-data" }}
+<main class="shortlist-page" id="shortlist-page" data-selected-application-id="{{ shortlist_data.selected_application_id|default_if_none:'' }}">
+    <header class="shortlist-heading">
+        <div>
+            <p class="eyebrow">CANDIDATE DECISIONS</p>
+            <h1>Shortlisting</h1>
+            <p>{{ job.title }} · Reviewing {{ screened_count }} selected screened application{{ screened_count|pluralize }}</p>
+        </div>
+        <a class="shortlist-back-link" href="{{ workspace_url }}?status=SCREENED">Back to screened applications</a>
+    </header>
+
+    <form id="shortlist-form" method="post">
+        {% csrf_token %}
+        {% for application in shortlist_data.applications %}<input type="hidden" name="application_ids" value="{{ application.id }}">{% endfor %}
+        <div class="shortlist-layout">
+            <section class="shortlist-review-panel" aria-labelledby="candidate-review-heading">
+                <header class="shortlist-panel-heading">
+                    <div><p class="eyebrow">APPLICATION ASSESSMENT</p><h2 id="candidate-review-heading">Select a candidate</h2></div>
+                    <span id="candidate-overall-score" class="shortlist-overall-score">—</span>
+                </header>
+                <div id="candidate-review-content" class="shortlist-review-content">
+                    <p class="shortlist-empty">Select a candidate from the queue to review their scores and evidence.</p>
+                </div>
+            </section>
+
+            <aside class="shortlist-queue-panel" aria-labelledby="screened-queue-heading">
+                <header class="shortlist-panel-heading shortlist-queue-heading">
+                    <div><p class="eyebrow">SCREENED APPLICATIONS</p><h2 id="screened-queue-heading">Candidate queue</h2></div>
+                    <span class="shortlist-selection-count">{{ screened_count }} selected</span>
+                </header>
+                <div class="shortlist-candidate-list" id="shortlist-candidate-list">
+                    {% for application in shortlist_data.applications %}
+                        <article class="shortlist-candidate" data-application-id="{{ application.id }}">
+                            <div class="shortlist-candidate-info">
+                                <strong>{{ application.name }}</strong>
+                                <small>{{ application.email }}</small>
+                                <small>{{ application.score|default_if_none:'—' }}{% if application.score != None %}%{% endif %} · {{ application.applied_date }}</small>
+                            </div>
+                            <button type="button" class="shortlist-view-button" data-view-application="{{ application.id }}">Review</button>
+                        </article>
+                    {% empty %}
+                        <p class="shortlist-empty">No screened applications are waiting to be shortlisted.</p>
+                    {% endfor %}
+                </div>
+            </aside>
+        </div>
+
+        <footer class="shortlist-actions">
+            <span class="shortlist-selection-count">{{ screened_count }} selected</span>
+            <button class="shortlist-submit-button" id="add-to-shortlisted" type="submit" {% if not screened_count %}disabled{% endif %}>Add to shortlisted</button>
+        </footer>
+    </form>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'workspace/js/application-shortlist.js' %}?v=3" defer></script>
+{% endblock %}

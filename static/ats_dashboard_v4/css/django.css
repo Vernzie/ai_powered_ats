@@ -1,0 +1,142 @@
+@media (max-width: 700px) {
+    .sidebar {
+        display: flex;
+        position: fixed;
+        inset: auto 0 0;
+        width: 100%;
+        height: 60px;
+        z-index: 20;
+    }
+
+    .brand,
+    .navlabel,
+    .sidebarfoot {
+        display: none;
+    }
+
+    .nav {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        padding: 0 4px;
+        width: 100%;
+    }
+
+    .navitem {
+        align-items: center;
+        flex: 1 0 58px;
+        flex-direction: column;
+        gap: 2px;
+        height: 60px;
+        justify-content: center;
+        margin: 0;
+        min-width: 58px;
+        padding: 4px 2px;
+        font-size: 9px;
+    }
+
+    .navitem span {
+        font-size: 14px;
+        width: auto;
+    }
+
+    .navitem.active {
+        border-left: 0;
+        border-top: 2px solid #fff;
+        padding: 2px;
+    }
+
+    .navitem b {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+        padding-bottom: 60px;
+        width: 100%;
+    }
+
+    .topbar {
+        gap: 10px;
+        padding: 0 14px;
+    }
+
+    .crumb {
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .topright {
+        gap: 7px;
+    }
+
+    .search {
+        width: min(125px, 32vw);
+    }
+
+    .topright .avatar {
+        flex: 0 0 28px;
+        height: 28px;
+        width: 28px;
+    }
+
+    .content {
+        padding: 16px;
+    }
+
+    .heading {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .toolbar {
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    .toolbar input {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    .toolbar select {
+        flex: 1 1 135px;
+        max-width: 100%;
+    }
+
+    .toolbar .spacer {
+        display: none;
+    }
+
+    .toolbar button {
+        margin-left: auto;
+    }
+
+    .tablewrap {
+        max-width: 100%;
+    }
+
+    .panel,
+    .box {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .tabs {
+        overflow-x: auto;
+    }
+
+    .jobhero > div {
+        flex-wrap: wrap;
+    }
+
+    .apphero {
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .review-toolbar-actions {
+        flex-wrap: wrap;
+    }
+}

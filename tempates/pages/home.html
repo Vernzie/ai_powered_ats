@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}Find your next role{% endblock %}
+
+{% block extra_css %}
+<style>
+	.home-shell {
+		margin: 0 auto;
+		max-width: 1180px;
+		padding: 72px 28px 0;
+	}
+
+	.intro {
+		display: grid;
+		gap: 32px;
+		grid-template-columns: minmax(0, 1.3fr) minmax(220px, .7fr);
+		padding-bottom: 72px;
+	}
+
+	.eyebrow {
+		color: var(--accent-dark);
+		font-family: Arial, sans-serif;
+		font-size: .72rem;
+		font-weight: 700;
+		letter-spacing: .14em;
+		margin: 0 0 18px;
+		text-transform: uppercase;
+	}
+
+	h1 {
+		font-size: clamp(2.8rem, 7vw, 6.2rem);
+		font-weight: 400;
+		letter-spacing: -.04em;
+		line-height: .95;
+		margin: 0;
+		max-width: 720px;
+	}
+
+	.intro-note {
+		align-self: end;
+		border-left: 3px solid var(--accent);
+		color: var(--muted);
+		font-family: Arial, sans-serif;
+		font-size: .95rem;
+		margin: 0;
+		padding: 4px 0 4px 20px;
+	}
+
+	.listing-heading {
+		align-items: baseline;
+		border-bottom: 1px solid var(--ink);
+		display: flex;
+		justify-content: space-between;
+		padding-bottom: 14px;
+	}
+
+	.listing-heading h2 { font-size: 1.55rem; margin: 0; }
+
+	.listing-count {
+		color: var(--muted);
+		font-family: Arial, sans-serif;
+		font-size: .75rem;
+		text-transform: uppercase;
+	}
+
+	.job-list { list-style: none; margin: 0; padding: 0; }
+
+	.job {
+		align-items: center;
+		border-bottom: 1px solid var(--line);
+		display: grid;
+		gap: 28px;
+		grid-template-columns: minmax(0, 1.4fr) minmax(150px, .7fr) auto;
+		padding: 30px 0;
+	}
+
+	.job h3 { font-size: 1.55rem; font-weight: 400; margin: 0 0 8px; }
+
+	.job-description {
+		color: var(--muted);
+		font-family: Arial, sans-serif;
+		font-size: .9rem;
+		margin: 0;
+		max-width: 530px;
+	}
+
+	.job-details {
+		font-family: Arial, sans-serif;
+		font-size: .78rem;
+		margin-top: 14px;
+		max-width: 530px;
+	}
+
+	.job-details summary {
+		color: var(--accent-dark);
+		cursor: pointer;
+		font-weight: 700;
+		list-style: none;
+		width: fit-content;
+	}
+
+	.job-details summary::-webkit-details-marker { display: none; }
+
+	.job-details summary::after {
+		content: ' +';
+		font-size: 1rem;
+	}
+
+	.job-details[open] summary::after { content: ' -'; }
+
+	.job-details p {
+		color: var(--muted);
+		line-height: 1.65;
+		margin: 10px 0 0;
+	}
+
+	.job-meta {
+		color: var(--muted);
+		font-family: Arial, sans-serif;
+		font-size: .78rem;
+		line-height: 1.7;
+	}
+
+	.job-meta strong { color: var(--ink); display: block; font-weight: 600; }
+
+	.apply-button {
+		background: var(--accent);
+		border: 1px solid var(--accent);
+		color: #fffdf8;
+		display: inline-block;
+		font-family: Arial, sans-serif;
+		font-size: .78rem;
+		font-weight: 700;
+		padding: 12px 18px;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.apply-button:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+	.view-button {
+		border: 1px solid var(--line);
+		display: inline-block;
+		font-family: Arial, sans-serif;
+		font-size: .78rem;
+		font-weight: 700;
+		padding: 12px 18px;
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.view-button:hover { border-color: var(--accent); color: var(--accent-dark); }
+
+	@media (max-width: 760px) {
+		.home-shell { padding: 48px 20px 0; }
+		.intro { grid-template-columns: 1fr; padding-bottom: 48px; }
+		.job { align-items: start; grid-template-columns: 1fr auto; }
+		.job-meta { grid-column: 1 / -1; grid-row: 2; }
+		.apply-button { grid-column: 2; grid-row: 1; }
+	}
+
+	@media (max-width: 460px) {
+		.job { grid-template-columns: 1fr; gap: 14px; }
+		.job-meta, .apply-button { grid-column: 1; grid-row: auto; }
+		.apply-button { justify-self: start; }
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-shell">
+	<section class="intro">
+		<div>
+			<p class="eyebrow">The workroom board</p>
+			<h1>Good work starts with the right room.</h1>
+		</div>
+		<p class="intro-note">A small, considered collection of roles from teams building what comes next.</p>
+	</section>
+
+	<section id="open-roles" aria-labelledby="open-roles-heading">
+		<div class="listing-heading">
+			<h2 id="open-roles-heading">Open roles</h2>
+			<span class="listing-count">{{ jobs|length }} opportunities</span>
+		</div>
+
+		<ul class="job-list">
+			{% for job in jobs %}
+			<li class="job">
+				<div>
+					<h3>{{ job.title }}</h3>
+					<p class="job-description">{{ job.description|truncatewords:10 }}</p>
+					<details class="job-details">
+						<summary>View more</summary>
+						<p>{{ job.description }}</p>
+						{% if job.criteria.all %}<p><strong>Requirements:</strong> {% for criterion in job.criteria.all %}{{ criterion.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+					</details>
+				</div>
+				<div class="job-meta">
+					<strong>{{ job.location }}</strong>
+					{{ job.salary }}<br>
+					Posted {{ job.posted_date }}<br>
+					Apply by {{ job.deadline }}
+				</div>
+				<div>
+					<a class="view-button" href="{% url 'job_detail' job.pk %}" aria-label="View details for {{ job.title }}">View job</a>
+					<a class="apply-button" href="{% url 'apply_job' job.pk %}" aria-label="Apply for {{ job.title }}">Apply now</a>
+				</div>
+			</li>
+			{% endfor %}
+		</ul>
+	</section>
+</div>
+{% endblock %}

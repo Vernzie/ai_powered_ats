@@ -1,0 +1,34 @@
+{% extends 'dashboard/atlas_shell.html' %}
+{% load static %}
+
+{% block title %}Interviewed Applications{% endblock %}
+{% block breadcrumb %}<a href="{{ workspace_url }}">Workspace</a><b>/</b>{{ job.title }}<b>/</b>Interviews{% endblock %}
+
+{% block dashboard_content %}
+<link rel="stylesheet" href="{% static 'workspace/css/application-interviews.css' %}?v=1">
+<main class="interviewed-page">
+    <header class="interviewed-heading">
+        <div>
+            <p class="eyebrow">INTERVIEW STAGE</p>
+            <h1>Interviewed applications</h1>
+            <p>{{ job.title }} · {{ interviewed_count }} candidate{{ interviewed_count|pluralize }}</p>
+        </div>
+        <a class="interviewed-back-link" href="{{ workspace_url }}?status=INTERVIEWED">Back to workspace</a>
+    </header>
+
+    <section class="interviewed-list" aria-label="Applications with Interviewed status">
+        {% for application in applications %}
+            <article class="interviewed-row">
+                <div class="interviewed-candidate">
+                    <strong>{{ application.applicant_name }}</strong>
+                    <small>{{ application.applicant_email }}</small>
+                </div>
+                <span class="interviewed-status">{{ application.get_status_display }}</span>
+                <time datetime="{{ application.applied_date|date:'c' }}">Applied {{ application.applied_date|date:'j M Y' }}</time>
+            </article>
+        {% empty %}
+            <p class="interviewed-empty">No applications are currently in the Interviewed stage.</p>
+        {% endfor %}
+    </section>
+</main>
+{% endblock %}

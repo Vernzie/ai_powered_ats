@@ -1,0 +1,349 @@
+# ATS Proof of Concept: Product and Technical Design
+
+## Document Purpose
+
+This document describes the recruitment workflow and AI-assisted application screening feature in the ATS proof of concept (POC). It separates current behavior from proposed improvements and includes a simplified OpenAI request example for design reference.
+
+> **Scope note:** API examples and cost figures are reference estimates. Confirm them against the deployed configuration and current provider pricing before implementation or budgeting.
+
+## 1. Product Overview
+
+The ATS provides a shared workflow for publishing jobs, receiving candidate applications, reviewing resumes, and moving applications through recruitment stages. Its screening feature compares resume evidence with the requirements configured for a job and saves a structured assessment for recruiter review.
+
+### Primary users
+
+- **Recruiter / administrator:** Creates and manages jobs, configures criteria and workflow, reviews applications, and makes progression decisions.
+- **Applicant:** Creates or uses an account, browses available jobs, and submits an application with a resume and cover letter.
+
+### Product goals
+
+- Keep job details, criteria, applications, documents, and screening results connected in one system.
+- Replace email-and-folder handling with online application submission and database-backed records.
+- Give recruiters a consistent, evidence-oriented way to review resumes against job requirements.
+
+AI screening is an aid to recruiter review. A score is not, by itself, a hiring decision.
+
+## 2. End-to-End Recruitment Workflow
+
+1. A recruiter creates a job and enters its details.
+2. The recruiter adds criteria and one or more requirements under each criterion.
+3. The job is previewed and published.
+4. An applicant signs in, opens an available job, and submits contact details, a resume, and a cover letter.
+5. The application is saved against the job and applicant account with an initial `RECEIVED` status.
+6. A recruiter selects an application for screening, or the configured automated workflow processes it.
+7. The system compares the resume with the job's requirements and saves the screening result.
+8. The application status is updated. Recruiters can review the score and requirement-level evidence and progress the candidate through later stages.
+
+The application status values represented by the current data model are:
+
+| Stored status | Display meaning |
+| --- | --- |
+| `RECEIVED` | Received / submitted; awaiting screening or review |
+| `SCREENED` | Screening has been completed, but the application is not shortlisted |
+| `SHORTLISTED` | Selected to progress from screening |
+| `INTERVIEWED` | Marked as having reached the interview stage |
+| `REJECTED` | Not progressing |
+
+For automated screening, the current implementation compares the overall screening score with the job threshold: a score at or above the threshold can set the status to `SHORTLISTED`; a lower score sets it to `SCREENED`. The semi-automated path records a completed screening as `SCREENED`, leaving the recruiter to decide whether to shortlist.
+
+## 3. Job Posting and Criteria
+
+### Current POC capability
+
+Recruiters can create a job and attach criteria. Each criterion can contain multiple requirements, and criteria can be added or changed independently of the job description.
+
+### Data model
+
+| Entity | Main fields and relationships |
+| --- | --- |
+| `Job` | Title, description, deadline, workflow, active state, screening threshold, location, and salary |
+| `Criterion` | Name; belongs to a job |
+| `Requirement` | Description and required/optional flag; belongs to a criterion |
+
+Criteria and requirements do not currently have weight fields. Any weighted scoring shown in a design or mock-up should not be described as an implemented capability unless weights are added to the data model and screening logic.
+
+### Recruiter flow
+
+1. Sign in to the dashboard.
+2. Select **Create job** and enter the job details.
+3. Add criteria and their requirements.
+4. Preview the job.
+5. Publish it so applicants can apply.
+
+### Why criteria are separate records
+
+Separating jobs, criteria, and requirements allows a recruiter to change the requirements without embedding them in a single job-description field. It also gives screening results stable requirement records to reference. If weighted scoring is introduced later, weights should be explicitly stored and applied by the screening logic.
+
+### Future improvements
+
+- Add configurable criterion and/or requirement weights, with documented scoring rules.
+- Provide REST endpoints or integrations for publishing jobs to external platforms.
+- Notify recruiters when new applications arrive.
+
+## 4. Application Submission
+
+### Current POC capability
+
+Applicants must be signed in. An application is linked to the selected job and the applicant's user account. The applicant submits an email address, resume, and cover letter. Resume and cover-letter uploads accept PDF, DOC, and DOCX files.
+
+### Data model
+
+| Entity | Role in the application |
+| --- | --- |
+| `User` | Identifies the signed-in applicant |
+| `Job` | Identifies the position being applied for |
+| `Application` | Stores applicant name and email, uploaded files, status, and applied date; links to the job and user |
+
+The applicant name is taken from the user's full name when available, otherwise from the username. The application record keeps documents and status associated with the correct job and candidate.
+
+### Applicant flow
+
+1. Sign in or create an account.
+2. Browse open jobs and view a job's details.
+3. Select **Apply**.
+4. Enter an email address and upload a resume and cover letter.
+5. Submit the form; the system validates and saves the application.
+6. Return to the job details page. The application is then available for recruiter review.
+
+### Future improvements
+
+- Send application confirmations and status-update emails.
+- Add configurable application questions and additional document formats.
+- Add candidate communications and interview scheduling.
+
+## 5. AI-Powered Application Screening
+
+### Purpose
+
+Screening compares resume content with the requirements attached to the job. The model returns an assessment for each requirement, including a score and supporting evidence. The result is stored for recruiter review rather than being discarded after display.
+
+### Screening inputs
+
+- The applicant's uploaded resume.
+- The job's criteria and requirements, including each requirement's database ID, description, criterion name, and required/optional flag.
+- Screening instructions that ask the model to assess every requirement using evidence from the resume.
+
+The cover letter is stored with the application, but the screening example below sends the resume and job requirements. Do not claim that cover letters are evaluated unless the active screening implementation explicitly includes them.
+
+### Processing outline
+
+1. The recruiter starts screening for an application, or an automated workflow triggers screening.
+2. The backend loads the application, its resume, and the job requirements.
+3. The resume is uploaded through the OpenAI Files API using `client.files.create(...)`.
+4. The file ID and serialized requirements are sent through `client.responses.create(...)` to `gpt-4.1-mini`.
+5. The model returns structured JSON containing an overall score, overall comments, and requirement-level results.
+6. The backend saves the overall result and each requirement assessment in a database transaction.
+7. The response is returned to the browser so the recruiter can see the result and evidence.
+
+### Simplified API example
+
+The following is an illustrative request shape. It documents the intended structured exchange; it is not a replacement for the application's complete request, validation, error-handling, or persistence code.
+
+```python
+import json
+
+requirements = [
+    {
+        "requirement_id": 17,
+        "criterion": "Education",
+        "description": "Bachelor's degree in computer science or a related field",
+        "required": True,
+    },
+    {
+        "requirement_id": 23,
+        "criterion": "Experience",
+        "description": "At least three years of Python backend development",
+        "required": True,
+    },
+]
+
+uploaded_file = client.files.create(
+    file=resume_file,
+    purpose="user_data",
+)
+
+response = client.responses.create(
+    model="gpt-4.1-mini",
+    instructions=(
+        "Review the resume against every supplied requirement. "
+        "Use only evidence in the resume. Give each requirement a score "
+        "from 0 to 100 and include concise evidence. Return every "
+        "requirement_id exactly once."
+    ),
+    input=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "input_text",
+                "text": "Requirements:\n" + json.dumps(requirements),
+            },
+            {"type": "input_file", "file_id": uploaded_file.id},
+        ],
+    }],
+    text={
+        "format": {
+            "type": "json_schema",
+            "name": "application_screening",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "overall_score": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 100,
+                    },
+                    "overall_comments": {"type": "string"},
+                    "criteria": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "requirement_id": {"type": "integer"},
+                                "assessment": {
+                                    "type": "string",
+                                    "enum": [
+                                        "meets",
+                                        "does_not_meet",
+                                        "partially_demonstrated",
+                                        "not_demonstrated",
+                                    ],
+                                },
+                                "score": {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 100,
+                                },
+                                "evidence": {"type": "string"},
+                            },
+                            "required": [
+                                "requirement_id",
+                                "assessment",
+                                "score",
+                                "evidence",
+                            ],
+                            "additionalProperties": False,
+                        },
+                    },
+                },
+                "required": ["overall_score", "overall_comments", "criteria"],
+                "additionalProperties": False,
+            },
+        },
+    },
+)
+
+screening_result = json.loads(response.output_text)
+```
+
+### Screening result and persistence
+
+| Result field | Meaning |
+| --- | --- |
+| `overall_score` | Overall resume-to-job fit score, from 0 to 100 |
+| `overall_comments` | Summary explanation of the assessment |
+| `criteria` | One result for each requirement supplied to the model |
+| `requirement_id` | Connects the result to the matching requirement record |
+| `assessment` | Categorical assessment such as `meets` or `not_demonstrated` |
+| `score` | Requirement-level score, from 0 to 100 |
+| `evidence` | Resume evidence supporting the requirement assessment |
+
+`ScreeningResult` is linked one-to-one with an `Application` and stores the overall score and comments. `ScreeningCriterionResult` stores each requirement's assessment, score, and evidence, linked to both the screening result and its `Requirement`.
+
+### Request and response flow
+
+1. The recruiter selects one or more applications in the review workspace.
+2. The browser sends application IDs to a Django screening endpoint using `fetch()`.
+3. The backend checks that the application, resume, and job requirements are available.
+4. The screening service sends the resume and requirements to OpenAI.
+5. Results are persisted and returned to the browser. For batch screening, completed results can be streamed as processing finishes so the interface can update progressively.
+
+### Error handling and operational notes
+
+- Requests are rejected when the application is invalid, the resume is missing, or no requirement is configured.
+- Screening-service and provider errors are returned to the caller; batch streaming can emit an error event.
+- Screening persistence is performed transactionally so the overall result and requirement-level results stay consistent.
+- Failed-folder storage and a dedicated screening-failure log are not described as current behavior. Treat them as proposed operational improvements unless separately implemented.
+- Retries, timeouts, rate limiting, background jobs, cancellation, and configurable cost/throughput controls are potential improvements.
+
+## 6. Processing Time and API Cost Estimates
+
+These figures are planning estimates, not service guarantees. Actual duration and usage depend on resume length, requirements, file type, network conditions, retries, and provider pricing.
+
+### Processing time estimate
+
+- Allow approximately 3-5 seconds for one typical application as an initial POC estimate.
+- At that rate, 100 applications processed sequentially would take approximately 5-9 minutes, excluding recruiter actions and retries.
+- Batch throughput depends on the screening service's concurrency configuration; measure it in the deployed environment before promising a processing time.
+
+### Example cost estimate
+
+OpenAI API credits are consumed by actual usage. A US$5 credit purchase is not a subscription or a guaranteed number of screenings. At the October 1, 2026 XE mid-market rate, US$5 was approximately K22.32 PGK; the card provider's rate and fees may differ.
+
+The model rates used in this estimate for `gpt-4.1-mini` are:
+
+- Input: US$0.40 per 1,000,000 tokens.
+- Output: US$1.60 per 1,000,000 tokens.
+
+For one ordinary, text-heavy resume and a typical set of requirements, the estimate assumes:
+
+- Input: 4,000-8,000 tokens for the resume, prompt, and requirements.
+- Output: 600-1,200 tokens for the structured result and evidence.
+- Midpoint example: 6,000 input tokens cost US$0.0024; 900 output tokens cost US$0.00144; estimated total is US$0.00384 per application.
+- US$5 divided by the midpoint estimate is approximately 1,300 applications. The low/high assumptions yield roughly 980-1,950 applications.
+
+Use approximately 1,000 applications as a cautious planning estimate, not a quota. Long resumes, many requirements, scanned or image-heavy PDFs, retries, price changes, payment fees, exchange-rate differences, and taxes can increase costs or reduce volume. PDF processing may include text and page images, so usage can vary. The application should record `response.usage.input_tokens` and `response.usage.output_tokens` so estimates can be replaced with measured POC averages.
+
+### Pricing references checked October 1, 2026
+
+- GPT-4.1 mini pricing: https://developers.openai.com/api/docs/models/gpt-4.1-mini/
+- API pricing: https://developers.openai.com/api/docs/pricing/
+- Prepaid API billing: https://help.openai.com/en/articles/8264644-how-can-i-set-up-prepaid-billing
+- File inputs and PDF usage: https://developers.openai.com/api/docs/guides/file-inputs/
+- USD to PGK conversion: https://www.xe.com/currencyconverter/convert/?Amount=5&From=USD&To=PGK
+
+## 7. Benefits and Expected Outcomes
+
+Based on the described POC capabilities, the system:
+
+- Gives recruiters a direct path to create and maintain job listings.
+- Replaces email-based application intake and manual folder organization with saved application records and uploaded files.
+- Keeps applications associated with the correct job and applicant account.
+- Presents requirement-level scores and resume evidence to support consistent recruiter review.
+- Stores screening results so recruiters can revisit the assessment rather than relying on a transient API response.
+
+These are workflow and record-management benefits. Screening scores do not guarantee hiring quality, remove recruiter judgment, or establish that the model is unbiased.
+
+## 8. Roadmap
+
+- Add configurable weights and document how they affect scores and thresholds.
+- Add recruiter and applicant email notifications.
+- Add job-board integrations through REST APIs.
+- Add application questions and broader file-format support.
+- Add candidate communications and interview scheduling.
+- Improve screening operations with retries, timeouts, rate limits, background processing, cancellation, and failure logging.
+- Track token usage and measured processing times to refine cost and throughput estimates.
+
+## 9. Important Django Routes
+
+| Purpose | Route |
+| --- | --- |
+| Create a job | `/dashboard/job/new/` |
+| Preview a new job | `/dashboard/job/new/review/` |
+| View a public job | `/home/job/<pk>/` |
+| Submit an application | `/home/job/<pk>/apply/` |
+| View a job in the recruiter dashboard | `/dashboard/job/?id=<job_id>` |
+| Screen one application | `/dashboard/application/<application_id>/screen/` |
+| Stream screening results for selected applications | `/dashboard/review/job/<job_id>/stream/` |
+
+## 10. Implementation Reference
+
+| Area | Relevant project files | Responsibility |
+| --- | --- | --- |
+| Jobs and applications | `job_application/models.py` | Job, Criterion, Requirement, and Application records |
+| Screening persistence | `application_screening/models.py` | Overall and requirement-level screening result records |
+| Screening endpoints | `application_screening/views.py` | Request validation, result persistence, status updates, and response handling |
+| Screening service | `screening.py` | Resume screening and model interaction |
+| Recruiter dashboard | `dashboard/views.py` | Job and application data supplied to the dashboard |
+
+

@@ -1,0 +1,217 @@
+{% extends 'dashboard/atlas_shell.html' %}
+
+{% block title %}Application Review{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .screening-shell {
+        display: grid;
+        gap: 22px;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        margin-top: 10px;
+    }
+
+    .screening-main,
+    .screening-sidebar {
+        background: #fff;
+        border: 1px solid var(--line);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, .04);
+        padding: 24px;
+    }
+
+    .screening-content-header {
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 18px;
+        padding-bottom: 16px;
+    }
+
+    .screening-content-header h2 {
+        font: 600 clamp(1.5rem, 2vw, 2rem) Georgia, serif;
+        margin: 0;
+    }
+
+    .screening-content-header p {
+        color: var(--muted);
+        margin: 8px 0 0;
+    }
+
+    .job-review-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .job-review-card {
+        align-items: center;
+        background: #fafaf8;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: var(--ink);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        padding: 18px 18px;
+        text-decoration: none;
+        transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+
+    .job-review-card:hover {
+        border-color: var(--accent);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, .06);
+        transform: translateY(-1px);
+    }
+
+    .job-review-card h3 {
+        font: 700 1.02rem Arial, sans-serif;
+        margin: 0 0 4px;
+    }
+
+    .job-review-meta {
+        color: var(--muted);
+        font: .78rem Arial, sans-serif;
+    }
+
+    .screening-sidebar {
+        align-self: start;
+        position: sticky;
+        top: 24px;
+    }
+
+    .sidebar-heading {
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+
+    .sidebar-heading h3 {
+        margin: 0;
+        font: 700 1rem Arial, sans-serif;
+    }
+
+    .recent-job-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .recent-job-link {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        color: var(--ink);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 14px 14px;
+        text-decoration: none;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .recent-job-link:hover {
+        border-color: var(--accent);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, .08);
+    }
+
+    .recent-job-link strong {
+        display: block;
+        margin-bottom: 0;
+    }
+
+    .recent-job-link span,
+    .recent-job-link small {
+        color: var(--muted);
+        display: block;
+        font: .75rem Arial, sans-serif;
+    }
+
+    .recent-job-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 4px;
+    }
+
+    .recent-job-results {
+        background: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        color: #fff;
+        display: inline-flex;
+        font: 700 .7rem Arial, sans-serif;
+        min-height: 32px;
+        padding: 0 12px;
+        text-decoration: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .empty-state {
+        color: var(--muted);
+        font: .9rem Arial, sans-serif;
+        margin: 0;
+        padding: 10px 0;
+    }
+
+    @media (max-width: 900px) {
+        .screening-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .screening-sidebar {
+            position: static;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<header class="review-page-heading">
+    <div>
+        <p class="eyebrow">Recruiting operations</p>
+        <h1>Application Review</h1>
+        <p>Open a job to review, screen, and update its non-shortlisted applications.</p>
+    </div>
+    <span class="tag auto">{{ jobs|length }} jobs to review</span>
+</header>
+
+<div class="review-layout-page">
+    <main class="review-main-panel">
+        <div class="screening-content-header">
+            <h2>Jobs with applications to review</h2>
+            <p>Each workspace includes job criteria, applicant status, screening, and saved results.</p>
+        </div>
+
+        <div class="review-job-list">
+            {% for job in jobs %}
+                <a class="review-job-card" href="{% url 'dashboard_review_job' job.pk %}">
+                    <div>
+                        <h3>{{ job.title }}</h3>
+                        <div class="job-review-meta">
+                            {{ job.application_count }} application{{ job.application_count|pluralize }} need review
+                        </div>
+                    </div>
+                    <span class="textbtn">Open review →</span>
+                </a>
+            {% empty %}
+                <p class="review-empty-state">No jobs have applications awaiting review.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+    <aside class="review-side-panel">
+        <div class="review-panel-heading">
+            <div><h3>Recently screened</h3><p>Open saved results from recent runs.</p></div>
+        </div>
+
+        <div class="review-recent-list">
+            {% for job in recent_jobs %}
+                <div class="review-recent-item">
+                    <strong>{{ job.title }}</strong>
+                    <small>{{ job.application_count }} application{{ job.application_count|pluralize }} · {{ job.latest_screened_at|date:'M d, Y' }}</small>
+                    <a class="textbtn" href="{% url 'dashboard_review_results' job.pk %}">View results →</a>
+                </div>
+            {% empty %}
+                <p class="review-empty-state">No screening runs yet.</p>
+            {% endfor %}
+        </div>
+    </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+# Planned AI Features for Recruitment Interviews
+
+These features extend the ATS screening workflow into interviews. They are product concepts, not currently implemented interview capabilities in this project. The existing Interviews page is a placeholder; the descriptions below outline how AI could support the workflow while recruiters retain control of decisions.
+
+## 1. AI-Generated Interview Questions
+
+Once candidates are shortlisted, AI can help interviewers prepare a consistent, relevant set of questions for the role.
+
+- **Shared questions:** Generate a core set from the job description and requirements. Ask every candidate for the same role these questions, making answers easier for the hiring panel to compare fairly.
+- **Candidate-specific questions:** Use the candidate's resume alongside the job requirements to suggest tailored follow-ups. These might clarify relevant experience, explore a stated project, or ask about a requirement that is not clearly demonstrated. Questions should be grounded in the submitted information, not invented assumptions.
+- **Recruiter review:** Interviewers or other stakeholders review the suggestions before the interview. They can keep, edit, or remove questions and add their own.
+- **Question weights:** Allow the panel to assign an importance weight to each question or competency before the interview. Higher-weight questions then contribute more to the assessment, according to the agreed scoring approach.
+
+A model such as the project's existing `gpt-4.1-mini` integration could generate structured question suggestions through `client.responses.create`, using the role requirements and relevant resume content as context. The AI proposes questions; the hiring team approves the interview plan.
+
+## 2. Interview Voice-to-Text and Answer Assessment
+
+A desktop interview application can support either a live recording or an uploaded recording, alongside manual scoring for interviewers who prefer to assess answers themselves.
+
+- **Transcription:** Convert recorded speech into a text transcript so the interview can be reviewed and assessed. An OpenAI audio transcription endpoint, such as `client.audio.transcriptions.create`, could provide the speech-to-text step.
+- **Question matching:** Associate transcript sections with the questions asked, where possible, so answers are assessed against the relevant question rather than as one undifferentiated conversation.
+- **AI-assisted assessment:** Compare each answer with its question, the role requirements, and the agreed evaluation criteria. Return a suggested score and concise supporting evidence, then apply the question's pre-agreed weight to the overall interview assessment.
+- **Human review:** Let interviewers inspect the transcript and evidence, enter or adjust scores manually, and record their rationale. AI scores should remain recommendations, not automatic hiring decisions.
+
+The desktop app can send the transcript and approved interview criteria to the same OpenAI project credentials used by the ATS. A Responses API call can return a structured assessment; audio transcription and answer evaluation are separate steps. Recording consent, access controls, retention, and secure handling of interview audio and transcripts should be part of the product design.
+
+## Final Hiring Outcome
+
+The goal is to help the hiring team identify and select one candidate to hire, not to let an AI score make that decision. AI can organize evidence across the resume and interview, while the recruiter and panel review the full application and make the final choice. The exact stages and assessment criteria can vary by role or application type; the workflow should be configurable rather than forcing every recruitment process into one sequence.

@@ -1,0 +1,14 @@
+Todo.
+
+1. Complete the processing of manually creating jobs and criteria. 
+2. Create an ai assistant for creating criteria.
+    This automatically scans the job fields and come up with the creteria.. 
+
+
+Instructions:
+    You are a HR assistant. You will assit in sort listing the cadidates. 
+    There are functions in tools. if you see the prompt is a question that is asking anything regarding
+
+
+STEPS:
+    Create a function that returns the criteria fo that job. 

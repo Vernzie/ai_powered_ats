@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    .dashboard-shell { background: #f5f7fb; display: block; margin: 0 0 0 250px; min-height: calc(100vh - 91px); padding: 28px 30px 50px; }
+    .dashboard-sidebar { background: var(--ink); bottom: 0; color: #fffdf8; left: 0; padding: 22px 14px; position: fixed; top: 0; width: 250px; z-index: 5; }
+    .sidebar-kicker, .eyebrow { color: var(--accent-dark); font-family: Arial, sans-serif; font-size: .72rem; font-weight: 700; letter-spacing: .14em; margin: 0 0 14px; text-transform: uppercase; }
+    .sidebar-kicker { color: var(--soft-accent); font-size: .68rem; margin: 0 0 12px; }
+    .sidebar-title { color: #fffdf8; font-size: 1.2rem; margin: 0 12px 28px; }
+    .sidebar-nav { border-left: 1px solid rgba(255, 253, 248, .28); display: grid; }
+    .sidebar-section-label { color: var(--soft-accent); font: 700 .66rem Arial, sans-serif; letter-spacing: .12em; margin: 0; padding: 8px 14px; text-transform: uppercase; }
+    .sidebar-section-divider { border-top: 1px solid rgba(255, 253, 248, .20); margin: 10px 14px 4px; }
+    .sidebar-nav a { color: rgba(255, 253, 248, .72); font: 700 .78rem Arial, sans-serif; padding: 12px 14px; text-decoration: none; }
+    .sidebar-nav a:hover, .sidebar-nav a:focus { background: rgba(11, 91, 204, .22); color: #fffdf8; }
+    .site-header { margin-left: 250px; max-width: none; width: calc(100% - 250px); }
+    .dashboard-main { min-width: 0; }
+    .dashboard-heading { align-items: end; border-bottom: 1px solid var(--ink); display: flex; justify-content: space-between; gap: 16px; margin-bottom: 20px; padding-bottom: 12px; }
+    .dashboard-heading .eyebrow { margin-bottom: 8px; }
+    .dashboard-heading h1 { font-size: 2.5rem; font-weight: 400; line-height: 1.05; margin: 0; }
+    .access-label, .section-count { color: var(--muted); font: 700 .72rem Arial, sans-serif; text-transform: uppercase; }
+    .section-block { margin-top: 32px; }
+    .section-heading { align-items: baseline; border-bottom: 1px solid var(--ink); display: flex; justify-content: space-between; gap: 16px; margin-bottom: 16px; padding-bottom: 12px; }
+    .section-heading h2 { font-size: 1.55rem; font-weight: 400; margin: 0; }
+    .overview-grid { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .stat-card { background: var(--surface); border: 1px solid var(--line); padding: 20px; }
+    .stat-label { color: var(--muted); font: 700 .7rem Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+    .stat-value { display: block; font-size: 2.7rem; font-weight: 400; margin-top: 16px; }
+    .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 0; box-shadow: 0 8px 30px rgba(15, 23, 42, .06); overflow-x: auto; }
+    .data-table { border-collapse: collapse; font-family: Arial, sans-serif; min-width: 650px; width: 100%; }
+    .data-table th, .data-table td { border-bottom: 1px solid var(--line); padding: 15px 16px; text-align: left; vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: 0; }
+    .data-table th { color: var(--muted); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
+    .data-table td { font-size: .82rem; }
+    .job-title { color: var(--ink); font-weight: 700; }.job-link { text-decoration: none; }.job-link:hover { color: var(--accent-dark); text-decoration: underline; }.muted-cell { color: var(--muted); }
+    .application-count { background: var(--soft-accent); color: var(--accent-dark); display: inline-block; font-size: .72rem; font-weight: 700; min-width: 28px; padding: 6px 8px; text-align: center; }
+    .row-actions, .document-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .workflow-topbar { margin-bottom: 12px; }
+    .dashboard-toggle-group { border: 1px solid var(--line); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+    .dashboard-toggle-group--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .dashboard-toggle-group--stacked { grid-template-columns: 1fr; }
+    .dashboard-toggle { align-items: center; background: transparent; border: 0; border-right: 1px solid var(--line); color: var(--muted); cursor: pointer; display: flex; flex-direction: column; font: 700 .66rem Arial, sans-serif; gap: 4px; justify-content: center; min-width: 0; padding: 9px 8px; text-align: center; text-transform: uppercase; }
+    .dashboard-toggle:last-child { border-right: 0; }
+    .dashboard-toggle-group--stacked .dashboard-toggle { align-items: flex-start; border-bottom: 1px solid var(--line); border-right: 0; padding: 10px 12px; text-align: left; }
+    .dashboard-toggle-group--stacked .dashboard-toggle:last-child { border-bottom: 0; }
+    .dashboard-toggle[aria-pressed="true"], .dashboard-toggle.is-active { background: var(--accent); color: #fff; }
+    .dashboard-toggle:focus-visible { outline: 2px solid var(--accent-dark); outline-offset: 2px; position: relative; z-index: 1; }
+    .dashboard-toggle-count { font-size: .72rem; }
+    .dashboard-shell :is(.single-job-actions, .screening-main, .screening-sidebar, .job-review-card, .recent-job-link, .screening-rail, .screening-pane, .selection-card, .criteria-item, .criteria-menu, .requirement-review, .review-empty, .review-content, .table-panel, .job-details-dialog) { border-radius: 0 !important; }
+    .dashboard-shell :is(a, button) { border-radius: 0 !important; }
+    .action-link, .action-button { background: transparent; border: 1px solid var(--line); color: var(--ink); cursor: pointer; display: inline-flex; font: 700 .7rem Arial, sans-serif; padding: 8px 10px; text-decoration: none; }.action-link:hover, .action-button:hover { border-color: var(--accent); color: var(--accent-dark); }.action-button.danger { color: var(--accent-dark); }
+    .document-link { color: var(--accent-dark); font-size: .7rem; font-weight: 700; text-decoration: none; }.document-link:hover { text-decoration: underline; }
+    .empty-state { color: var(--muted); font: .84rem Arial, sans-serif; margin: 0; padding: 22px; }
+    .job-form { display: grid; gap: 15px; }.field { display: grid; gap: 7px; }.field label { font: 700 .72rem Arial, sans-serif; }.field input, .field textarea { background: #fffdf8; border: 1px solid var(--line); color: var(--ink); font: .84rem Arial, sans-serif; padding: 11px 12px; width: 100%; }.field textarea { min-height: 110px; resize: vertical; }.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px; }.submit-button, .btn { background: var(--accent); border: 1px solid var(--accent); color: #fffdf8; cursor: pointer; font: 700 .74rem Arial, sans-serif; padding: 11px 16px; text-decoration: none; }.btn:not(.primary) { background: transparent; color: var(--ink); }
+    @media (max-width: 820px) { .dashboard-shell { margin-left: 68px; padding: 28px 20px 40px; }.dashboard-sidebar { width: 68px; }.site-header { margin-left: 68px; width: calc(100% - 68px); }.sidebar-title, .sidebar-kicker, .sidebar-section-label, .sidebar-section-divider, .sidebar-nav a { font-size: 0; }.sidebar-section-label, .sidebar-section-divider { display: none; }.sidebar-title { margin: 0; }.sidebar-nav { border-left: 0; }.sidebar-nav a { padding: 14px 0; text-align: center; }.sidebar-nav a::before { color: #fffdf8; font-size: 1rem; }.sidebar-nav a:nth-of-type(1)::before { content: 'O'; }.sidebar-nav a:nth-of-type(2)::before { content: 'J'; }.sidebar-nav a:nth-of-type(3)::before { content: 'A'; }.sidebar-nav a:nth-of-type(4)::before { content: 'I'; }.sidebar-nav a:nth-of-type(5)::before { content: 'W'; } }
+    @media (max-width: 560px) { .dashboard-shell { padding-left: 15px; padding-right: 15px; }.dashboard-heading { align-items: start; flex-direction: column; }.overview-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell">
+    <aside class="dashboard-sidebar" aria-label="Dashboard navigation">
+        <p class="sidebar-kicker">Admin workspace</p>
+        <h2 class="sidebar-title">Workroom control</h2>
+        <nav class="sidebar-nav">
+            <p class="sidebar-section-label">Hiring</p>
+            <a href="{% url 'dashboard_overview' %}">Overview</a>
+            <a href="{% url 'dashboard_jobs' %}">Jobs</a>
+            <a href="{% url 'dashboard_applications' %}">Applications</a>
+            <a href="{% url 'dashboard_interviews' %}">Interviews</a>
+            <div class="sidebar-section-divider"></div>
+            <p class="sidebar-section-label">Workspace</p>
+            <a href="{% url 'dashboard_workspace' %}">Workspace</a>
+        </nav>
+    </aside>
+    <main class="dashboard-main">
+        {% block dashboard_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}

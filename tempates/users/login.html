@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-layout">
+        <div class="auth-intro">
+            <p class="auth-eyebrow">Welcome back</p>
+            <h1>Return to the workroom.</h1>
+            <p>Pick up where you left off and keep moving toward work that fits.</p>
+        </div>
+
+        <div class="auth-card">
+            <h2>Login</h2>
+            <p class="auth-card-intro">Use your Workroom account to continue.</p>
+
+            <form class="auth-form" method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="form-field">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                    {{ form.username.errors }}
+                </div>
+
+                <div class="form-field">
+                    {{ form.password.label_tag }}
+                    <div class="password-wrap">
+                        {{ form.password }}
+                        <button class="password-toggle" type="button" data-password-toggle="id_password">Show</button>
+                    </div>
+                    {{ form.password.errors }}
+                </div>
+
+                <button class="auth-submit" type="submit">Login to Workroom</button>
+            </form>
+
+            <p class="auth-switch">New here? <a href="{% url 'register' %}">Create an account</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

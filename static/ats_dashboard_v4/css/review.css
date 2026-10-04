@@ -1,0 +1,700 @@
+.review-page-heading {
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+}
+
+.review-page-heading h1 {
+    font-size: 27px;
+    margin: 0;
+}
+
+.review-page-heading p {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 5px 0 0;
+}
+
+.visually-hidden {
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+.review-layout-page {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.review-main-panel,
+.review-side-panel,
+.review-job-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    min-width: 0;
+}
+
+.review-main-panel,
+.review-side-panel {
+    padding: 18px;
+}
+
+.review-panel-heading {
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+}
+
+.review-panel-heading h2,
+.review-panel-heading h3 {
+    font-size: 15px;
+    margin: 0;
+}
+
+.review-panel-heading p {
+    color: var(--muted);
+    font-size: 11px;
+    margin: 4px 0 0;
+}
+
+.review-job-list {
+    display: grid;
+    gap: 10px;
+}
+
+.review-job-card {
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.review-job-card:hover {
+    border-color: var(--blue);
+}
+
+.review-job-card strong {
+    display: block;
+    font-size: 13px;
+}
+
+.review-job-card small {
+    color: var(--muted);
+    display: block;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.review-recent-list {
+    display: grid;
+    gap: 12px;
+}
+
+.review-recent-item {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 12px;
+}
+
+.review-recent-item:last-child {
+    border-bottom: 0;
+}
+
+.review-recent-item strong,
+.review-recent-item small {
+    display: block;
+}
+
+.review-recent-item strong {
+    font-size: 12px;
+}
+
+.review-recent-item small {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+.review-count {
+    background: var(--blue2);
+    color: var(--blue);
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 8px;
+}
+
+.review-empty-state {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 20px 4px;
+}
+
+.review-messages {
+    margin-bottom: 14px;
+}
+
+.review-messages p {
+    background: var(--greenbg);
+    border: 1px solid var(--line);
+    color: var(--green);
+    font-size: 12px;
+    margin: 0 0 6px;
+    padding: 9px 12px;
+}
+
+.review-messages .error {
+    background: var(--redbg);
+    color: var(--red);
+}
+
+.review-messages .warning {
+    background: var(--amberbg);
+    color: var(--amber);
+}
+
+.screening-shell {
+    align-items: start;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    margin-top: 16px;
+}
+
+.screening-main {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+}
+
+.screening-side {
+    min-width: 0;
+    position: sticky;
+    top: 90px;
+}
+
+.screening-rail,
+.selection-card,
+.screening-pane {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    min-width: 0;
+}
+
+.screening-rail {
+    max-height: calc(100vh - 110px);
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.selection-card,
+.screening-pane {
+    padding: 18px;
+}
+
+.selection-card h2,
+.screening-pane h2 {
+    font-size: 16px;
+    margin-top: 0;
+}
+
+.selection-card .eyebrow,
+.screening-pane .eyebrow {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.criteria-list,
+.application-list {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.criteria-item {
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    margin-bottom: 10px;
+    padding: 12px;
+}
+
+.criteria-item h3 {
+    font-size: 13px;
+    margin: 0 0 8px;
+}
+
+.criteria-item li,
+.criteria-item p {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.criteria-item ul {
+    margin: 8px 0 0;
+    padding-left: 18px;
+}
+
+.criteria-menu {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .12);
+    min-width: 150px;
+    padding: 6px;
+    position: absolute;
+    right: 0;
+    z-index: 5;
+}
+
+.criteria-menu button {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    display: block;
+    padding: 8px 10px;
+    text-align: left;
+    width: 100%;
+}
+
+.criteria-toolbar,
+.selection-actions,
+.review-controls {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 12px;
+}
+
+.criteria-form-wrapper[hidden] {
+    display: none;
+}
+
+.criteria-form,
+.criteria-edit-form {
+    display: grid;
+    gap: 12px;
+}
+
+.criteria-edit-form {
+    display: none;
+    margin-top: 12px;
+}
+
+.criteria-edit-form.is-open {
+    display: grid;
+}
+
+.criteria-form .field input,
+.criteria-form .field textarea,
+.criteria-edit-form .field input,
+.criteria-edit-form .field textarea {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 10px;
+    width: 100%;
+}
+
+.criteria-form textarea,
+.criteria-edit-form textarea {
+    min-height: 82px;
+}
+
+.sidebar-tab-bar {
+    margin: 12px;
+}
+
+.sidebar-panel {
+    display: none;
+}
+
+.sidebar-panel.is-active {
+    display: block;
+}
+
+.screening-rail .selection-summary,
+.screening-rail .sidebar-actions {
+    padding: 12px 14px;
+}
+
+.screening-rail .selection-summary {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.screening-rail .selection-summary h2 {
+    font-size: 14px;
+    margin: 0;
+}
+
+.application-item {
+    align-items: center;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+}
+
+.application-item label,
+.screened-item-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.application-item strong,
+.application-item small,
+.screened-item-meta strong,
+.screened-item-meta small {
+    display: block;
+}
+
+.application-item strong,
+.screened-item-meta strong {
+    font-size: 12px;
+}
+
+.application-item small,
+.screened-item-meta small {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.application-status-form {
+    align-items: center;
+    display: flex;
+    flex: 1 0 100%;
+    gap: 6px;
+    margin-left: 22px;
+}
+
+.application-status-form select {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    flex: 1;
+    font-size: 10px;
+    min-width: 0;
+    padding: 6px;
+}
+
+.application-status-form button {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    font-size: 10px;
+    padding: 6px 8px;
+}
+
+.review-workspace {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 240px minmax(0, 1fr) 280px;
+    min-height: 65vh;
+}
+
+.review-workspace.job-hidden {
+    grid-template-columns: 0 minmax(0, 1fr) 280px;
+}
+
+.screening-pane {
+    max-height: 68vh;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.screening-pane .requirement-review {
+    border-bottom: 1px solid var(--line);
+    padding: 12px 0;
+}
+
+.requirement-title {
+    font-size: 13px;
+    margin: 0 0 8px;
+}
+
+.review-empty,
+.review-evidence {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.review-content,
+.overall-review {
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    margin-top: 8px;
+    padding: 12px;
+}
+
+.review-assessment {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.assessment-meets { color: var(--green); }
+.assessment-partially_demonstrated { color: var(--amber); }
+.assessment-does_not_meet,
+.assessment-not_demonstrated { color: var(--red); }
+
+.score-bar {
+    background: var(--line);
+    height: 6px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.score-bar-fill {
+    background: var(--blue);
+    height: 100%;
+}
+
+.screening-status,
+.selection-count {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.screening-loader {
+    display: none;
+}
+
+.screening-loader.is-visible {
+    display: inline-flex;
+}
+
+.spinner,
+.loading-spinner {
+    animation: review-spin .8s linear infinite;
+    border: 3px solid var(--blue2);
+    border-radius: 50%;
+    border-top-color: var(--blue);
+    height: 18px;
+    width: 18px;
+}
+
+.job-review-list {
+    display: grid;
+    gap: 10px;
+}
+
+.job-review-card {
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.job-review-card h3 {
+    font-size: 14px;
+    margin: 0;
+}
+
+.job-review-meta {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.screening-results-shell {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.results-main {
+    min-width: 0;
+}
+
+.screening-rail .application-item[hidden] {
+    display: none;
+}
+
+.score-filter {
+    padding: 12px 14px 0;
+}
+
+.score-filter-label {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.score-filter-options {
+    margin-top: 8px;
+}
+
+.custom-score-controls {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    margin-top: 8px;
+}
+
+.custom-score-controls[hidden] {
+    display: none;
+}
+
+.custom-score-controls input {
+    border: 1px solid var(--line);
+    min-width: 0;
+    padding: 8px;
+}
+
+.results-topbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.job-details-overlay {
+    align-items: center;
+    background: rgba(15, 19, 23, .42);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: 20px;
+    position: fixed;
+    z-index: 50;
+}
+
+.job-details-dialog {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    max-height: 80vh;
+    max-width: 700px;
+    overflow: auto;
+    padding: 24px;
+    position: relative;
+    width: 100%;
+}
+
+.job-details-dialog h2 {
+    margin-top: 0;
+}
+
+.close-job-modal {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+}
+
+.selection-layout {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.review-page-heading .action-link,
+.screening-shell .btn,
+.screening-results-shell .view-job-button {
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--text);
+    cursor: pointer;
+    display: inline-flex;
+    font: 600 12px "Segoe UI", Arial, sans-serif;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    text-decoration: none;
+}
+
+.screening-shell .submit-button {
+    background: var(--blue);
+    border: 1px solid var(--blue);
+    color: #fff;
+    cursor: pointer;
+    font: 600 12px "Segoe UI", Arial, sans-serif;
+    min-height: 38px;
+    padding: 0 14px;
+}
+
+.screening-shell .submit-button:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+.screening-shell input[type="checkbox"] {
+    accent-color: var(--blue);
+}
+
+@keyframes review-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1050px) {
+    .review-layout-page,
+    .screening-shell,
+    .screening-results-shell,
+    .selection-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .screening-side {
+        position: static;
+    }
+}
+
+@media (max-width: 900px) {
+    .review-workspace,
+    .review-workspace.job-hidden {
+        grid-template-columns: minmax(0, 1fr) 280px;
+    }
+
+    .review-workspace .job-pane {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 700px) {
+    .review-page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .review-workspace,
+    .review-workspace.job-hidden {
+        display: block;
+    }
+
+    .review-workspace .screening-pane {
+        margin-bottom: 12px;
+        max-height: none;
+    }
+
+    .job-hidden .job-pane {
+        display: none;
+    }
+
+    .job-review-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

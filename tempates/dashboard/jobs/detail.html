@@ -1,0 +1,323 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{{ job.title }} | Admin dashboard{% endblock %}
+
+{% block dashboard_content %}
+<style>
+    .job-detail-page {
+        margin-top: 8px;
+    }
+
+    .job-layout {
+        display: block;
+    }
+
+    .job-main {
+        min-width: 0;
+    }
+
+    .job-detail-page .job-main > .section-block:first-child {
+        margin-top: 0;
+    }
+
+    .job-detail-page .panel {
+        border-radius: 0;
+    }
+
+    .job-description-heading {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .job-description-heading h2 {
+        margin: 0;
+    }
+
+    .job-menu {
+        position: relative;
+    }
+
+    .job-menu > summary {
+        align-items: center;
+        border: 1px solid var(--line);
+        cursor: pointer;
+        display: flex;
+        font: 700 1.3rem Arial, sans-serif;
+        height: 34px;
+        justify-content: center;
+        list-style: none;
+        width: 34px;
+    }
+
+    .job-menu > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .job-menu-popup {
+        background: #fff;
+        border: 1px solid var(--line);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .12);
+        display: none;
+        min-width: 140px;
+        padding: 4px;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 4px);
+        z-index: 10;
+    }
+
+    .job-menu[open] .job-menu-popup {
+        display: grid;
+    }
+
+    .job-menu-popup a,
+    .job-menu-popup button {
+        background: transparent;
+        border: 0;
+        color: var(--ink);
+        cursor: pointer;
+        display: block;
+        font: 600 .76rem Arial, sans-serif;
+        padding: 10px 12px;
+        text-align: left;
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .job-menu-popup a:hover,
+    .job-menu-popup button:hover {
+        background: #f1f5f9;
+    }
+
+    .job-menu-popup .danger {
+        color: #b91c1c;
+    }
+
+    .criterion-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .criterion-card {
+        background: #fff;
+        border: 1px solid var(--line);
+        padding: 16px;
+    }
+
+    .criterion-card-heading {
+        align-items: flex-start;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+    }
+
+    .criterion-card-heading h3 {
+        margin: 0;
+    }
+
+    .criterion-requirements {
+        margin: 10px 0 0;
+        padding-left: 20px;
+    }
+
+    .criterion-edit-form,
+    .criterion-add-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+    }
+
+    .criterion-edit-form[hidden],
+    .criterion-add-form[hidden] {
+        display: none;
+    }
+
+    .criterion-form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .criteria-add-action {
+        margin-top: 16px;
+    }
+
+</style>
+
+<div class="job-detail-page">
+    <header class="dashboard-heading">
+        <div>
+            <p class="eyebrow">Job listing</p>
+            <h1>{{ job.title }}</h1>
+        </div>
+    </header>
+
+    <div class="job-layout">
+        <div class="job-main">
+            <section class="section-block">
+                <div class="section-heading">
+                    <h2>Job details</h2>
+                </div>
+                <div class="panel" style="padding:22px">
+                    <div class="job-description-heading">
+                        <h2>Job description</h2>
+                        <details class="job-menu">
+                            <summary aria-label="More job actions">&hellip;</summary>
+                            <div class="job-menu-popup">
+                                <a href="{% url 'job_update' job.pk %}">Edit job</a>
+                                <form method="post" action="{% url 'job_delete' job.pk %}">
+                                    {% csrf_token %}
+                                    <button class="danger" type="submit">Delete job</button>
+                                </form>
+                            </div>
+                        </details>
+                    </div>
+                    <p>{{ job.description }}</p>
+
+                    <h2>Requirements</h2>
+                    {% if criteria %}
+                        {% for criterion in criteria %}
+                            <h3>{{ criterion.name }}</h3>
+                            {% if criterion.requirements.all %}
+                                <ul>
+                                    {% for requirement in criterion.requirements.all %}
+                                        <li>{{ requirement.description }}{% if requirement.required %} (Required){% endif %}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p>No requirements listed.</p>
+                    {% endif %}
+
+                    <p><strong>Location:</strong> {{ job.location }}<br><strong>Salary:</strong> ${{ job.salary }}<br><strong>Deadline:</strong> {{ job.deadline|date:'F j, Y' }}</p>
+                </div>
+            </section>
+
+            <section class="section-block">
+                <div class="section-heading">
+                    <h2>Criteria</h2>
+                    <span class="section-count">{{ criteria|length }} configured</span>
+                </div>
+                {% if criteria %}
+                    <div class="criterion-list">
+                        {% for criterion in criteria %}
+                            <article class="criterion-card">
+                                <div class="criterion-card-heading">
+                                    <h3>{{ criterion.name }}</h3>
+                                    <details class="job-menu">
+                                        <summary aria-label="More actions for {{ criterion.name }}">&hellip;</summary>
+                                        <div class="job-menu-popup">
+                                            <button type="button" data-edit-criterion="{{ criterion.pk }}">Edit</button>
+                                            <form method="post" action="">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_criterion">
+                                                <input type="hidden" name="criterion_id" value="{{ criterion.pk }}">
+                                                <button class="danger" type="submit">Delete</button>
+                                            </form>
+                                        </div>
+                                    </details>
+                                </div>
+                                {% if criterion.requirements.all %}
+                                    <ul class="criterion-requirements">
+                                        {% for requirement in criterion.requirements.all %}
+                                            <li>{{ requirement.description }}{% if requirement.required %} (Required){% endif %}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="empty-state">No requirements configured.</p>
+                                {% endif %}
+                                <form method="post" action="" class="criterion-edit-form" data-criterion-form="{{ criterion.pk }}" hidden>
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="edit_criterion">
+                                    <input type="hidden" name="criterion_id" value="{{ criterion.pk }}">
+                                    <div class="field">
+                                        <label for="criterion-name-{{ criterion.pk }}">Criterion name</label>
+                                        <input id="criterion-name-{{ criterion.pk }}" type="text" name="criterion_name" value="{{ criterion.name }}" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="criterion-requirements-{{ criterion.pk }}">Requirements, one per line</label>
+                                        <textarea id="criterion-requirements-{{ criterion.pk }}" name="requirement_text">{% for requirement in criterion.requirements.all %}{{ requirement.description }}{% if not forloop.last %}
+{% endif %}{% endfor %}</textarea>
+                                    </div>
+                                    <div class="criterion-form-actions">
+                                        <button class="submit-button" type="submit">Save changes</button>
+                                        <button class="btn cancel-criterion-edit" type="button">Cancel</button>
+                                    </div>
+                                </form>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="empty-state">No criteria configured.</p>
+                {% endif %}
+            </section>
+            <div class="criteria-add-action">
+                <button id="add-criterion-toggle" class="submit-button" type="button">Add criteria</button>
+                <form id="add-criterion-form" class="criterion-add-form" method="post" action="" hidden>
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_criterion">
+                    <div class="field">
+                        <label for="new-criterion-name">Criterion name</label>
+                        <input id="new-criterion-name" type="text" name="criterion_name" required>
+                    </div>
+                    <div class="field">
+                        <label for="new-criterion-requirements">Requirements, one per line</label>
+                        <textarea id="new-criterion-requirements" name="requirement_text"></textarea>
+                    </div>
+                    <div class="criterion-form-actions">
+                        <button class="submit-button" type="submit">Save criterion</button>
+                        <button id="cancel-add-criterion" class="btn" type="button">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    (() => {
+        const page = document.querySelector('.job-detail-page');
+        if (!page) return;
+
+        page.addEventListener('click', (event) => {
+            if (event.target instanceof Element && !event.target.closest('.job-menu')) {
+                page.querySelectorAll('.job-menu[open]').forEach((menu) => { menu.open = false; });
+            }
+        });
+
+        page.querySelectorAll('[data-edit-criterion]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const card = button.closest('.criterion-card');
+                const form = card.querySelector('.criterion-edit-form');
+                form.hidden = false;
+                button.closest('.job-menu').open = false;
+                form.querySelector('[name="criterion_name"]').focus();
+            });
+        });
+
+        page.querySelectorAll('.cancel-criterion-edit').forEach((button) => {
+            button.addEventListener('click', () => {
+                const form = button.closest('.criterion-edit-form');
+                form.reset();
+                form.hidden = true;
+            });
+        });
+
+        const addToggle = page.querySelector('#add-criterion-toggle');
+        const addForm = page.querySelector('#add-criterion-form');
+        const cancelAdd = page.querySelector('#cancel-add-criterion');
+        addToggle.addEventListener('click', () => {
+            addForm.hidden = false;
+            addToggle.hidden = true;
+            addForm.querySelector('[name="criterion_name"]').focus();
+        });
+        cancelAdd.addEventListener('click', () => {
+            addForm.reset();
+            addForm.hidden = true;
+            addToggle.hidden = false;
+        });
+    })();
+</script>
+{% endblock %}

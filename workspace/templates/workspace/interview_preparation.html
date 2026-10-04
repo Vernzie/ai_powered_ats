@@ -1,0 +1,81 @@
+{% extends 'dashboard/atlas_shell.html' %}
+{% load static %}
+
+{% block title %}Prepare Interview Questions{% endblock %}
+{% block breadcrumb %}<a href="{{ workspace_url }}?status=INTERVIEWED">Interviews</a><b>/</b>{{ application.applicant_name }}<b>/</b>Prepare questions{% endblock %}
+
+{% block dashboard_content %}
+<link rel="stylesheet" href="{% static 'workspace/css/interview-preparation.css' %}?v=7">
+{{ interview_questions|json_script:"interview-question-data" }}
+<main class="interview-preparation-page" id="interview-preparation" data-create-question-url="{{ question_create_url }}" data-question-url-template="{{ question_url_template }}" data-generate-questions-url="{{ generate_questions_url }}">
+    <form id="interview-csrf-token" hidden>{% csrf_token %}</form>
+    <header class="interview-preparation-heading">
+        <div>
+            <p class="eyebrow">INTERVIEW PREPARATION</p>
+            <h1>{{ application.applicant_name }}</h1>
+            <p>{{ job.title }} · {{ application.applicant_email }}</p>
+            <div class="interview-application-picker" id="interview-application-picker">
+                <span class="interview-application-picker-label" id="interview-application-picker-label">Interview Prep application</span>
+                <button type="button" class="interview-application-select" id="interview-application-select" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="interview-application-picker-label">
+                    <span class="interview-application-option-info"><strong>{{ application.applicant_name }}</strong><small>{{ application.applicant_email }}</small></span>
+                    <span class="interview-application-question-count">{{ application.interview_questions.count }} question{{ application.interview_questions.count|pluralize }}</span>
+                    <span class="interview-application-chevron" aria-hidden="true"></span>
+                </button>
+                <div class="interview-application-options" id="interview-application-options" role="listbox" aria-label="Interview Prep applications" hidden>
+                    {% for interview_application in interview_applications %}
+                        <button type="button" role="option" class="interview-application-option" data-application-url="{% url 'workspace_prepare_interview' job_id=job.pk application_id=interview_application.pk %}" aria-selected="{% if interview_application.pk == application.pk %}true{% else %}false{% endif %}">
+                            <span class="interview-application-option-info"><strong>{{ interview_application.applicant_name }}</strong><small>{{ interview_application.applicant_email }}</small></span>
+                            <span class="interview-application-question-count">{{ interview_application.interview_question_count }} question{{ interview_application.interview_question_count|pluralize }}</span>
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <a class="interview-preparation-back" href="{{ workspace_url }}?status=INTERVIEWED">Back to interviews</a>
+    </header>
+
+    <div class="interview-preparation-layout">
+        <section class="interview-preparation-panel resume-panel" aria-labelledby="resume-heading">
+            <header class="interview-preparation-panel-heading">
+                <div><p class="eyebrow">CANDIDATE DOCUMENT</p><h2 id="resume-heading">Resume</h2></div>
+            </header>
+            {% if resume_exists and resume_is_pdf %}
+                <object class="interview-resume-frame" data="{{ resume_url }}" type="application/pdf" aria-label="Resume for {{ application.applicant_name }}">
+                    <iframe class="interview-resume-frame" src="{{ resume_url }}" title="Resume for {{ application.applicant_name }}"></iframe>
+                </object>
+            {% elif resume_exists %}
+                <div class="interview-resume-fallback">
+                    <p>Preview this document in a separate window.</p>
+                    <a href="{{ resume_url }}" target="_blank" rel="noopener">Open or download resume</a>
+                </div>
+            {% else %}
+                <div class="interview-resume-fallback">Resume file unavailable.</div>
+            {% endif %}
+        </section>
+
+        <section class="interview-preparation-panel questions-panel" aria-labelledby="questions-heading">
+            <header class="interview-preparation-panel-heading">
+                <div><p class="eyebrow">QUESTION SET</p><h2 id="questions-heading">Interview questions</h2></div>
+                <button type="button" class="interview-add-question" id="add-interview-question">Add question</button>
+            </header>
+            <section class="interview-ai-generator" aria-label="Generate interview questions with AI">
+                <label class="interview-question-field" for="interview-ai-prompt">Prompt for AI
+                    <textarea id="interview-ai-prompt" rows="3" placeholder="Example: Ask about a difficult Python bug, how you tested the fix, and what you learned."></textarea>
+                </label>
+                <div class="interview-ai-generator-actions">
+                    <label class="interview-question-field" for="interview-ai-question-count">Number of questions
+                        <input id="interview-ai-question-count" type="number" min="1" max="20" step="1" value="5">
+                    </label>
+                    <button type="button" class="interview-generate-questions" id="generate-interview-questions" aria-busy="false"><span class="interview-ai-spinner" aria-hidden="true"></span><span id="generate-interview-questions-label">Generate questions</span></button>
+                </div>
+                <p class="interview-ai-feedback" id="interview-ai-feedback" role="status" aria-live="polite"></p>
+            </section>
+            <div class="interview-question-list" id="interview-question-list" aria-live="polite"></div>
+        </section>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'workspace/js/interview-preparation.js' %}?v=7" defer></script>
+{% endblock %}

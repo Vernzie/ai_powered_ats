@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-shell {
+        margin: 0 auto;
+        max-width: 980px;
+        padding: 72px 28px 0;
+    }
+
+    .detail-header {
+        border-bottom: 1px solid var(--ink);
+        padding-bottom: 34px;
+    }
+
+    .eyebrow {
+        color: var(--accent-dark);
+        font-family: Arial, sans-serif;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .14em;
+        margin: 0 0 18px;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        font-size: clamp(2.5rem, 7vw, 5.8rem);
+        font-weight: 400;
+        letter-spacing: -.04em;
+        line-height: .95;
+        margin: 0 0 24px;
+    }
+
+    .detail-meta {
+        color: var(--muted);
+        display: flex;
+        flex-wrap: wrap;
+        font-family: Arial, sans-serif;
+        font-size: .82rem;
+        gap: 18px;
+    }
+
+    .detail-meta strong { color: var(--ink); }
+
+    .detail-content {
+        display: grid;
+        gap: 56px;
+        grid-template-columns: minmax(0, 1fr) 220px;
+        padding: 44px 0 20px;
+    }
+
+    .detail-content h2 {
+        font-size: 1.5rem;
+        font-weight: 400;
+        margin: 0 0 18px;
+    }
+
+    .description {
+        color: var(--muted);
+        font-family: Arial, sans-serif;
+        font-size: .95rem;
+        line-height: 1.8;
+        white-space: pre-line;
+    }
+
+    .detail-aside {
+        border-left: 1px solid var(--line);
+        padding-left: 24px;
+    }
+
+    .apply-button {
+        background: var(--accent);
+        border: 1px solid var(--accent);
+        color: #fffdf8;
+        display: inline-block;
+        font-family: Arial, sans-serif;
+        font-size: .78rem;
+        font-weight: 700;
+        padding: 12px 18px;
+        text-decoration: none;
+    }
+
+    .apply-button:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+    .back-link {
+        color: var(--muted);
+        display: inline-block;
+        font-family: Arial, sans-serif;
+        font-size: .78rem;
+        margin-top: 28px;
+        text-decoration: none;
+    }
+
+    .back-link:hover { color: var(--accent-dark); }
+
+    @media (max-width: 700px) {
+        .detail-shell { padding: 48px 20px 0; }
+        .detail-content { grid-template-columns: 1fr; gap: 28px; }
+        .detail-aside { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-shell">
+    <header class="detail-header">
+        <p class="eyebrow">Open role</p>
+        <h1>{{ job.title }}</h1>
+        <div class="detail-meta">
+            <span><strong>{{ job.location }}</strong></span>
+            <span>{{ job.salary }}</span>
+            <span>Posted {{ job.posted_date|date:'F j, Y' }}</span>
+            <span>Apply by {{ job.deadline|date:'F j, Y' }}</span>
+        </div>
+    </header>
+
+    <div class="detail-content">
+        <article>
+            <h2>About the role</h2>
+            <div class="description">{{ job.description }}</div>
+            <h2>Requirements</h2>
+            <div class="description">{% if criteria %}{% for criterion in criteria %}<h3>{{ criterion.name }}</h3>{% if criterion.requirements.all %}<ul>{% for requirement in criterion.requirements.all %}<li>{{ requirement.description }}{% if requirement.required %} (Required){% else %} (Nice to have){% endif %}</li>{% endfor %}</ul>{% else %}<p>No requirements in this criterion.</p>{% endif %}{% endfor %}{% else %}No requirements listed.{% endif %}</div>
+        </article>
+        <aside class="detail-aside">
+            <a class="apply-button" href="{% url 'apply_job' job.pk %}">Apply now</a>
+        </aside>
+    </div>
+
+    <a class="back-link" href="{% url 'home' %}">&larr; Back to open roles</a>
+</div>
+{% endblock %}

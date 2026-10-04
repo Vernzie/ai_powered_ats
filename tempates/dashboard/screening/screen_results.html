@@ -1,0 +1,610 @@
+{% extends 'dashboard/atlas_shell.html' %}
+
+{% block title %}Screening results | {{ job.title }}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .screening-results-shell { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+    .results-main { min-width: 0; }
+    .screening-side { position: sticky; top: 18px; }
+    .screening-rail { background: #fff; border: 1px solid #e3e8ed; border-radius: 14px; box-shadow: 0 10px 28px rgba(15, 23, 42, .05); max-height: 72vh; overflow-y: auto; }
+    .screening-rail .application-list { list-style: none; margin: 0; padding: 0 22px 22px; }
+    .screening-rail .application-item { align-items: center; border-top: 1px solid #e7ebee; display: flex; gap: 10px; padding: 14px 0; }
+    .screening-rail .application-item[hidden] { display: none; }
+    .screening-rail .application-item:first-child { border-top: 0; }
+    .screening-rail .application-item strong,
+    .screening-rail .application-item small { display: block; }
+    .screening-rail .application-item small { color: #71808a; font: .72rem Arial, sans-serif; margin-top: 4px; }
+    .screening-rail .application-item label { flex: 1; }
+    .screening-rail .selection-summary { padding: 22px 22px 0; }
+    .score-filter { padding: 16px 18px 0; }
+    .score-filter-label { color: var(--muted); font: 700 .68rem Arial, sans-serif; text-transform: uppercase; }
+    .score-filter-options { grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: 8px; }
+    .custom-score-controls { display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr) auto; margin-top: 10px; }
+    .custom-score-controls[hidden] { display: none; }
+    .custom-score-controls label { align-self: center; color: var(--muted); font: 700 .68rem Arial, sans-serif; grid-column: 1 / -1; text-transform: uppercase; }
+    .custom-score-controls input { background: #fff; border: 1px solid var(--line); box-sizing: border-box; color: var(--ink); font: .8rem Arial, sans-serif; min-width: 0; padding: 8px 10px; width: 100%; }
+    .score-filter-empty { padding: 12px 18px 18px; }
+    .results-topbar { align-items: center; display: flex; gap: 10px; justify-content: flex-end; margin: 0 0 14px; }
+    .view-job-button, .close-job-modal { background: #fff; border: 1px solid #cfd8e3; border-radius: 8px; color: #1f2d3d; cursor: pointer; font: 600 .78rem Arial, sans-serif; min-height: 36px; padding: 0 14px; }
+    .view-job-button:hover, .close-job-modal:hover { border-color: #6d8bb6; }
+    .job-details-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.35); z-index: 50; align-items: flex-start; justify-content: flex-start; padding: 26px 0 24px 24px; }
+    .job-details-dialog { background: #fff; border: 1px solid #dfe7ef; border-radius: 16px; box-shadow: 0 24px 60px rgba(15,23,42,.18); max-width: 700px; width: min(700px, calc(100vw - 40px)); max-height: 80vh; overflow: auto; position: relative; padding: 24px 28px; }
+    .job-details-dialog h2 { font-size: 2rem; margin: 0 0 12px; }
+    .review-workspace { display: grid; min-height: 0; transition: grid-template-columns .25s ease; }
+    .screening-pane, .selection-card { background: #fff; border: 1px solid #e3e8ed; border-radius: 14px; min-width: 0; overflow: visible; padding: 18px 20px; box-shadow: 0 10px 28px rgba(15, 23, 42, .05); }
+    .selection-card h2, .screening-pane h2 { margin-top: 0; }
+    .job-form-compact { display: none; }
+    .job-pane { display: none; }
+    .review-controls { align-items: center; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-top: 18px; }
+    .overall-review { background: #edf4ff; border: 1px solid #d4e2ff; margin-bottom: 20px; padding: 16px; }
+    .overall-review h3 { color: #0a3d8f; margin: 0 0 6px; }
+    .overall-score { color: #0b5bcc; font: 700 1.7rem Arial, sans-serif; }
+    .requirement-reviews { display: grid; gap: 16px; }
+    .requirement-review { background: #f9fbff; border: 1px solid #dfeafc; border-radius: 14px; padding: 18px; }
+    .requirement-title { color: #0a3d8f; font-size: 1.12rem; line-height: 1.35; margin: 0 0 12px; }
+    .review-empty { background: #f7f9fa; border: 1px solid #e9edf3; border-radius: 10px; color: #71808a; font: .82rem Arial, sans-serif; padding: 15px; }
+    .review-content { background: #fff; border: 1px solid #eaf0ff; border-radius: 12px; padding: 14px; }
+    .review-assessment { align-items: center; display: flex; gap: 10px; justify-content: space-between; margin: 0 0 10px; }
+    .assessment { border-radius: 999px; display: inline-block; font: 700 .64rem Arial, sans-serif; letter-spacing: .04em; padding: 5px 9px; text-transform: uppercase; }
+    .assessment-meets { background: #d8f0df; color: #176b3a; }
+    .assessment-partially_demonstrated { background: #fff0c7; color: #8a5a00; }
+    .assessment-does_not_meet { background: #f8d8d5; color: #9b3028; }
+    .assessment-not_demonstrated { background: #e4e8ec; color: #59636d; }
+    .score { color: #0b5bcc; font: 700 .82rem Arial, sans-serif; }
+    .score-bar { background: #e8edf1; border-radius: 999px; height: 8px; overflow: hidden; }
+    .score-bar-fill { background: #0b5bcc; border-radius: inherit; height: 100%; }
+    .review-evidence { color: #45545e; font: .86rem Arial, sans-serif; line-height: 1.6; margin: 11px 0 0; }
+    .review-application { background: transparent; border: 0; color: #22323c; cursor: pointer; display: block; padding: 0; text-align: left; width: 100%; }
+    .review-application.is-selected { background: #eef6f7; margin: -8px; padding: 8px; width: calc(100% + 16px); }
+    .review-application:hover strong { color: #0b5bcc; }
+    .review-application strong, .review-application small { display: block; }
+    .review-application small { color: #71808a; font: .72rem Arial, sans-serif; margin-top: 4px; }
+    .screening-status { color: #64727b; font: .76rem Arial, sans-serif; }
+    .loading-state { align-items: center; display: flex; gap: 12px; justify-content: center; min-height: 220px; padding: 20px; }
+    .loading-spinner { animation: screening-spin .8s linear infinite; border: 4px solid #dfeafc; border-radius: 50%; border-top-color: #0b5bcc; height: 24px; width: 24px; }
+    @keyframes screening-spin { to { transform: rotate(360deg); } }
+    @media (max-width: 900px) {
+        .screening-results-shell { grid-template-columns: 1fr; }
+        .screening-side { position: static; }
+        .review-workspace { grid-template-columns: 180px minmax(0, 1fr); }
+        .review-workspace .application-pane { grid-column: 1 / -1; max-height: 350px; }
+        .review-workspace.job-hidden { grid-template-columns: 0 minmax(0, 1fr); }
+    }
+    @media (max-width: 650px) {
+        .review-workspace, .review-workspace.job-hidden { display: block; }
+        .screening-pane { margin-bottom: 14px; }
+        .job-hidden .job-pane { display: none; }
+    }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<header class="review-page-heading">
+    <div>
+        <p class="eyebrow">Application Review · Saved results</p>
+        <h1>{{ job.title }}</h1>
+    </div>
+    <div class="results-topbar">
+        <button id="screen-new-applications" class="view-job-button" type="button">Run / rerun applications</button>
+        <button id="view-job-button" class="view-job-button" type="button">View job</button>
+        <button id="stop-screening-results" class="view-job-button" type="button" style="border-color:#d0d7de; color:#8a1d1d; display:none;">Stop screening</button>
+        <a class="action-link" href="{% url 'dashboard_review_job' job_id=job.pk %}">Back to review</a>
+    </div>
+</header>
+
+<div class="screening-results-shell">
+    <main class="results-main">
+        <section id="review-stage" class="screening-stage">
+            <div id="review-workspace" class="review-workspace">
+                <main class="screening-pane">
+                    <div class="review-controls">
+                        <div>
+                            <p class="eyebrow">Stage 2 · Requirement review</p>
+                            <h2 id="selected-name">Select an application</h2>
+                        </div>
+                        <span id="selected-score" class="overall-score"></span>
+                    </div>
+
+                    <div id="overall-review" class="overall-review" hidden>
+                        <h3>Overall assessment</h3>
+                        <p id="overall-comments"></p>
+                    </div>
+
+                    <div id="requirement-reviews" class="requirement-reviews">
+                        {% for criterion in job.criteria.all %}
+                            {% for requirement in criterion.requirements.all %}
+                                <article class="requirement-review" data-requirement-id="{{ requirement.pk }}">
+                                    <h3 class="requirement-title">{{ requirement.description }}</h3>
+                                    <p class="review-empty">Select an application to see the AI assessment.</p>
+                                </article>
+                            {% empty %}
+                                <p class="empty-state">No requirements configured.</p>
+                            {% endfor %}
+                        {% empty %}
+                            <p class="empty-state">No criteria configured.</p>
+                        {% endfor %}
+                    </div>
+                </main>
+
+            </div>
+        </section>
+    </main>
+
+    <aside class="screening-side">
+        <div class="screening-rail">
+            <div class="score-filter">
+                <span class="score-filter-label">Filter by AI score</span>
+                <div class="score-filter-options dashboard-toggle-group dashboard-toggle-group--four" role="group" aria-label="AI score filter">
+                    <button class="dashboard-toggle" type="button" data-score-filter="50" aria-pressed="true">50+</button>
+                    <button class="dashboard-toggle" type="button" data-score-filter="70" aria-pressed="false">70+</button>
+                    <button class="dashboard-toggle" type="button" data-score-filter="90" aria-pressed="false">90+</button>
+                    <button class="dashboard-toggle" type="button" data-score-filter="below-50" aria-pressed="false">&lt;50</button>
+                    <button class="dashboard-toggle" type="button" data-score-filter="custom" aria-pressed="false">Custom</button>
+                </div>
+                <div id="custom-score-controls" class="custom-score-controls" hidden>
+                    <label for="custom-score-input">Minimum score</label>
+                    <input id="custom-score-input" type="number" min="0" max="100" step="1" value="50" required>
+                    <button id="apply-custom-score" class="submit-button" type="button">Apply</button>
+                </div>
+            </div>
+            <div class="section-heading selection-summary">
+                <h2>Applications</h2>
+                <span id="screened-count" class="section-count">{{ total_screened }}</span>
+            </div>
+            <ul id="rail-application-list" class="application-list"></ul>
+            <p id="score-filter-empty" class="empty-state score-filter-empty" hidden></p>
+        </div>
+    </aside>
+</div>
+
+<div id="job-details-modal" class="job-details-overlay" style="display:none; align-items:center; justify-content:center;">
+    <div class="job-details-dialog" style="margin: 0 auto;">
+        <button id="close-job-modal" class="close-job-modal" type="button" aria-label="Close job details" style="position:absolute; top:14px; right:14px;">✕</button>
+        <p class="eyebrow" style="margin-top:0;">Job details</p>
+        <h2>{{ job.title }}</h2>
+        <p style="color:#52616b; font: .95rem Arial, sans-serif; line-height:1.7; margin:0 0 18px;">{{ job.description }}</p>
+        <div style="display:grid; gap:8px; color:#394a59; font: .9rem Arial, sans-serif;">
+            <div><strong>Location:</strong> {{ job.location }}</div>
+            <div><strong>Salary:</strong> {{ job.salary }}</div>
+            <div><strong>Deadline:</strong> {{ job.deadline|date:'F j, Y' }}</div>
+        </div>
+    </div>
+</div>
+
+<script id="screened-results" type="application/json">{{ screened_results|safe }}</script>
+<script>
+const screenResults = JSON.parse(document.getElementById('screened-results').textContent || '[]');
+const jobId = {{ job.pk }};
+const railList = document.getElementById('rail-application-list');
+const screenedCount = document.getElementById('screened-count');
+const scoreFilterButtons = [...document.querySelectorAll('[data-score-filter]')];
+const customScoreControls = document.getElementById('custom-score-controls');
+const customScoreInput = document.getElementById('custom-score-input');
+const applyCustomScoreButton = document.getElementById('apply-custom-score');
+const scoreFilterEmpty = document.getElementById('score-filter-empty');
+const requirementReviews = [...document.querySelectorAll('[data-requirement-id]')];
+const selectedName = document.getElementById('selected-name');
+const selectedScore = document.getElementById('selected-score');
+const overallReview = document.getElementById('overall-review');
+const overallComments = document.getElementById('overall-comments');
+const viewJobButton = document.getElementById('view-job-button');
+const stopScreeningButton = document.getElementById('stop-screening-results');
+const screenNewApplicationsButton = document.getElementById('screen-new-applications');
+const jobModal = document.getElementById('job-details-modal');
+const closeJobModalButton = document.getElementById('close-job-modal');
+let pollController = null;
+let pollTimer = null;
+let activeScreeningController = null;
+let activeScoreMinimum = 50;
+let activeScoreMode = 'minimum';
+
+function setActiveScoreFilter(activeButton) {
+    scoreFilterButtons.forEach((button) => {
+        button.setAttribute('aria-pressed', String(button === activeButton));
+    });
+}
+
+function applyScoreFilter() {
+    const items = [...railList.querySelectorAll('.application-item')];
+    const scoredItems = items.filter((item) => item.dataset.score !== undefined);
+    let visibleScoredItems = 0;
+
+    items.forEach((item) => {
+        if (item.dataset.score === undefined) {
+            item.hidden = false;
+            return;
+        }
+        const score = Number(item.dataset.score);
+        const isVisible = activeScoreMode === 'below-50'
+            ? score < 50
+            : score >= activeScoreMinimum;
+        item.hidden = !isVisible;
+        if (isVisible) visibleScoredItems += 1;
+    });
+
+    scoreFilterEmpty.textContent = 'No applications meet this AI score filter.';
+    scoreFilterEmpty.hidden = scoredItems.length === 0 || visibleScoredItems > 0;
+}
+
+function getPendingApplicationIds() {
+    const items = Array.isArray(screenResults) ? screenResults : [];
+    return items
+        .filter((item) => item && String(item.status || '').toUpperCase() !== 'SHORTLISTED')
+        .map((item) => Number(item.application_id))
+        .filter((id) => Number.isFinite(id));
+}
+
+function updateScreenActionState() {
+    const ids = getPendingApplicationIds();
+    if (!screenNewApplicationsButton) return;
+    const hasPending = ids.length > 0;
+    screenNewApplicationsButton.hidden = !hasPending;
+    screenNewApplicationsButton.disabled = !hasPending;
+    if (!hasPending) {
+        screenNewApplicationsButton.textContent = 'No applications to review';
+        return;
+    }
+    screenNewApplicationsButton.textContent = 'Run / rerun applications';
+}
+
+function setPollingState(active) {
+    if (stopScreeningButton) {
+        stopScreeningButton.style.display = active ? 'inline-flex' : 'none';
+    }
+}
+
+stopScreeningButton?.addEventListener('click', () => {
+    if (pollController) {
+        pollController.abort();
+        pollController = null;
+    }
+    if (pollTimer) {
+        clearTimeout(pollTimer);
+        pollTimer = null;
+    }
+    setPollingState(false);
+    selectedName.textContent = 'Review paused. You can run screening again from this workspace.';
+    overallReview.hidden = true;
+    requirementReviews.forEach((review) => {
+        review.querySelector('.loading-state')?.remove();
+        review.querySelector('.review-content')?.remove();
+        const empty = document.createElement('p');
+        empty.className = 'review-empty';
+        empty.textContent = 'Screening was stopped.';
+        review.appendChild(empty);
+    });
+});
+
+function toggleJobModal(show) {
+    if (!jobModal) return;
+    jobModal.style.display = show ? 'flex' : 'none';
+}
+
+viewJobButton?.addEventListener('click', () => toggleJobModal(true));
+closeJobModalButton?.addEventListener('click', () => toggleJobModal(false));
+jobModal?.addEventListener('click', (event) => {
+    if (event.target === jobModal) toggleJobModal(false);
+});
+
+function setLoadingState(message = 'Loading screening results...') {
+    selectedName.textContent = message;
+    selectedScore.textContent = '';
+    overallReview.hidden = true;
+    requirementReviews.forEach((review) => {
+        review.querySelector('.review-empty')?.remove();
+        review.querySelector('.review-content')?.remove();
+        const loader = document.createElement('div');
+        loader.className = 'loading-state';
+        loader.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span><span>Loading...</span>';
+        review.appendChild(loader);
+    });
+}
+
+function renderPendingItem(result) {
+    const item = document.createElement('li');
+    item.className = 'application-item pending-item';
+
+    const label = document.createElement('div');
+    label.className = 'review-application';
+    label.style.pointerEvents = 'none';
+    label.style.opacity = '0.9';
+    label.innerHTML = `<strong>${result.applicant_name}</strong><small>Waiting for screening results</small>`;
+
+    const spinner = document.createElement('span');
+    spinner.className = 'loading-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
+    spinner.style.marginLeft = 'auto';
+    spinner.style.width = '18px';
+    spinner.style.height = '18px';
+    spinner.style.borderWidth = '3px';
+
+    item.appendChild(label);
+    item.appendChild(spinner);
+    return item;
+}
+
+function showScreening(screening, applicationName) {
+    selectedName.textContent = applicationName;
+    selectedScore.textContent = screening ? `${screening.overall_score}%` : '';
+    overallReview.hidden = !screening;
+    if (screening) {
+        overallComments.textContent = screening.overall_comments;
+    }
+
+    requirementReviews.forEach((review) => {
+        const result = screening?.criteria.find((item) => String(item.requirement_id) === review.dataset.requirementId);
+        review.querySelector('.review-empty')?.remove();
+        review.querySelector('.review-content')?.remove();
+        review.querySelector('.loading-state')?.remove();
+
+        if (!result) {
+            const empty = document.createElement('p');
+            empty.className = 'review-empty';
+            empty.textContent = screening ? 'No AI assessment was returned for this requirement.' : 'Select an application to see the AI assessment.';
+            review.appendChild(empty);
+            return;
+        }
+
+        const score = Math.max(0, Math.min(100, Number(result.score)));
+        const assessment = String(result.assessment).toLowerCase();
+        const content = document.createElement('div');
+        content.className = 'review-content';
+        content.innerHTML = `
+            <div class="review-assessment">
+                <span class="assessment assessment-${assessment}">${assessment.replaceAll('_', ' ')}</span>
+                <span class="score">${score}%</span>
+            </div>
+            <div class="score-bar"><div class="score-bar-fill" style="width:${score}%"></div></div>
+            <p class="review-evidence">${result.evidence}</p>
+        `;
+        review.appendChild(content);
+    });
+}
+
+async function loadApplicationReview(applicationId, applicationName, button) {
+    const screening = button?.dataset.screening ? JSON.parse(button.dataset.screening) : null;
+
+    if (screening && screening.criteria) {
+        document.querySelectorAll('.review-application').forEach((item) => item.classList.remove('is-selected'));
+        button?.classList.add('is-selected');
+        showScreening(screening, applicationName);
+        return;
+    }
+
+    setLoadingState('Loading review...');
+    const response = await fetch(`/dashboard/review/job/${jobId}/application/${applicationId}/`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Could not load this review.');
+
+    document.querySelectorAll('.review-application').forEach((item) => item.classList.remove('is-selected'));
+    button?.classList.add('is-selected');
+    showScreening(data.screening, applicationName);
+}
+
+function renderCompletedItem(result) {
+    const scoreText = result.overall_score !== null && result.overall_score !== undefined ? ` · Score ${result.overall_score}%` : ` · ${result.status || 'Pending'}`;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'review-application';
+    button.dataset.applicationId = String(result.application_id);
+    if (result.criteria) {
+        button.dataset.screening = JSON.stringify({
+            overall_score: result.overall_score,
+            overall_comments: result.overall_comments,
+            criteria: result.criteria,
+        });
+    }
+    button.innerHTML = `<strong>${result.applicant_name}</strong><small>${String(result.status || 'Applied').replace('_', ' ')}${scoreText}</small>`;
+    button.addEventListener('click', async () => {
+        try {
+            await loadApplicationReview(result.application_id, result.applicant_name, button);
+        } catch (error) {
+            selectedName.textContent = error.message;
+        }
+    });
+
+    const item = document.createElement('li');
+    item.className = 'application-item';
+    if (result.overall_score !== null && result.overall_score !== undefined && Number.isFinite(Number(result.overall_score))) {
+        item.dataset.score = String(Number(result.overall_score));
+    }
+    item.appendChild(button);
+    return item;
+}
+
+function renderApplicationList(results) {
+    const items = Array.isArray(results) ? results : [];
+    railList.innerHTML = '';
+    screenedCount.textContent = String(items.length);
+    screenResults.splice(0, screenResults.length, ...items);
+    updateScreenActionState();
+
+    if (!items.length) {
+        applyScoreFilter();
+        selectedName.textContent = 'No screening results yet';
+        overallReview.hidden = true;
+        requirementReviews.forEach((review) => {
+            review.querySelector('.review-empty')?.remove();
+            review.querySelector('.review-content')?.remove();
+            review.querySelector('.loading-state')?.remove();
+            const empty = document.createElement('p');
+            empty.className = 'review-empty';
+            empty.textContent = 'No screening result is available yet.';
+            review.appendChild(empty);
+        });
+        return;
+    }
+
+    const pendingResults = items.filter((result) => result.pending);
+    const completedResults = items.filter((result) => !result.pending);
+
+    if (pendingResults.length) {
+        pendingResults.forEach((result) => railList.appendChild(renderPendingItem(result)));
+        selectedName.textContent = pendingResults[0].applicant_name;
+        setLoadingState('Screening in progress...');
+    }
+
+    completedResults.forEach((result) => {
+        railList.appendChild(renderCompletedItem(result));
+    });
+
+    applyScoreFilter();
+    const firstCompleted = railList.querySelector('.application-item:not([hidden]):not(.pending-item) .review-application');
+    if (!pendingResults.length && firstCompleted) {
+        firstCompleted.click();
+    }
+}
+
+async function triggerScreenNewApplications() {
+    const applicationIds = getPendingApplicationIds();
+    if (!applicationIds.length) {
+        selectedName.textContent = 'There are no new applications to screen.';
+        return;
+    }
+
+    if (activeScreeningController) {
+        activeScreeningController.abort();
+    }
+
+    const controller = new AbortController();
+    activeScreeningController = controller;
+    setPollingState(true);
+    selectedName.textContent = 'Screening new applications...';
+    setLoadingState('Screening new applications...');
+
+    try {
+        const response = await fetch(`/dashboard/review/job/${jobId}/stream/`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            body: JSON.stringify({ job_id: jobId, application_ids: applicationIds }),
+            signal: controller.signal,
+        });
+
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw new Error(payload.error || 'Screening failed.');
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) {
+            throw new Error('The browser could not start the screening stream.');
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (controller.signal.aborted) {
+                throw new DOMException('Screening aborted.', 'AbortError');
+            }
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const events = buffer.split('\n');
+            buffer = events.pop() || '';
+
+            for (const entry of events) {
+                const text = entry.trim();
+                if (!text) continue;
+                const event = JSON.parse(text);
+                if (event.type === 'all_done') {
+                    const refreshed = await fetch(`/dashboard/review/job/${jobId}/results/data/`, { signal: controller.signal });
+                    const payload = await refreshed.json().catch(() => ({ results: [] }));
+                    renderApplicationList(Array.isArray(payload.results) ? payload.results : []);
+                    return;
+                }
+                if (event.type === 'error') {
+                    throw new Error(event.error || 'Screening failed.');
+                }
+            }
+        }
+
+        if (buffer.trim()) {
+            const event = JSON.parse(buffer.trim());
+            if (event.type === 'all_done') {
+                const refreshed = await fetch(`/dashboard/review/job/${jobId}/results/data/`, { signal: controller.signal });
+                const payload = await refreshed.json().catch(() => ({ results: [] }));
+                renderApplicationList(Array.isArray(payload.results) ? payload.results : []);
+                return;
+            }
+            if (event.type === 'error') {
+                throw new Error(event.error || 'Screening failed.');
+            }
+        }
+
+        const refreshed = await fetch(`/dashboard/review/job/${jobId}/results/data/`, { signal: controller.signal });
+        const payload = await refreshed.json().catch(() => ({ results: [] }));
+        renderApplicationList(Array.isArray(payload.results) ? payload.results : []);
+    } catch (error) {
+        if (error.name === 'AbortError' || controller.signal.aborted) {
+            selectedName.textContent = 'Screening stopped.';
+            setPollingState(false);
+            return;
+        }
+        selectedName.textContent = error.message;
+        setPollingState(false);
+    } finally {
+        if (activeScreeningController === controller) {
+            activeScreeningController = null;
+        }
+    }
+}
+
+screenNewApplicationsButton?.addEventListener('click', triggerScreenNewApplications);
+
+scoreFilterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        if (button.dataset.scoreFilter === 'custom') {
+            customScoreInput.value = String(activeScoreMinimum);
+            customScoreControls.hidden = false;
+            setActiveScoreFilter(button);
+            customScoreInput.focus();
+            return;
+        }
+
+        activeScoreMode = button.dataset.scoreFilter === 'below-50' ? 'below-50' : 'minimum';
+        activeScoreMinimum = activeScoreMode === 'below-50' ? 50 : Number(button.dataset.scoreFilter);
+        customScoreControls.hidden = true;
+        setActiveScoreFilter(button);
+        applyScoreFilter();
+    });
+});
+
+applyCustomScoreButton?.addEventListener('click', () => {
+    if (!customScoreInput.reportValidity()) return;
+    activeScoreMode = 'minimum';
+    activeScoreMinimum = Number(customScoreInput.value);
+    setActiveScoreFilter(scoreFilterButtons.find((button) => button.dataset.scoreFilter === 'custom'));
+    applyScoreFilter();
+});
+
+if (screenResults.length) {
+    setPollingState(false);
+    renderApplicationList(screenResults);
+} else {
+    selectedName.textContent = 'No screening results yet';
+    overallReview.hidden = true;
+    requirementReviews.forEach((review) => {
+        const empty = document.createElement('p');
+        empty.className = 'review-empty';
+        empty.textContent = 'No screening result is available yet.';
+        review.appendChild(empty);
+    });
+    railList.innerHTML = '';
+    applyScoreFilter();
+    setPollingState(false);
+    updateScreenActionState();
+}
+
+if (document.getElementById('toggle-job')) {
+    document.getElementById('toggle-job').addEventListener('click', (event) => {
+        const workspace = document.getElementById('review-workspace');
+        workspace.classList.toggle('job-hidden');
+        event.currentTarget.textContent = workspace.classList.contains('job-hidden') ? 'Show job' : 'Hide job';
+    });
+}
+</script>
+{% endblock %}

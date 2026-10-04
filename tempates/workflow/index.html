@@ -1,0 +1,94 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Workflow | Admin dashboard{% endblock %}
+
+{% block dashboard_content %}
+<section class="section-block" style="margin-top: 0;">
+    <div class="workflow-topbar">
+        <div class="dashboard-toggle-group" role="tablist" aria-label="Workflow toggle">
+            <button class="dashboard-toggle is-active" type="button" data-workflow-tab="auto" aria-pressed="true">Auto</button>
+            <button class="dashboard-toggle" type="button" data-workflow-tab="manual" aria-pressed="false">Manual</button>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top: 0;">
+        <div id="workflow-auto-panel" class="workflow-panel" data-workflow-panel="auto">
+            {% if auto_jobs %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Location</th>
+                            <th>Deadline</th>
+                            <th>Applications</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in auto_jobs %}
+                        <tr>
+                            <td><a class="job-title job-link" href="{% url 'admin_job_detail' job.pk %}">{{ job.title }}</a></td>
+                            <td class="muted-cell">{{ job.location }}</td>
+                            <td class="muted-cell">{{ job.deadline|date:'M d, Y' }}</td>
+                            <td><span class="application-count">{{ job.applications.count }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-state">No jobs are assigned to the Auto workflow.</p>
+            {% endif %}
+        </div>
+
+        <div id="workflow-manual-panel" class="workflow-panel" style="display:none;" data-workflow-panel="manual">
+            {% if manual_jobs %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Location</th>
+                            <th>Deadline</th>
+                            <th>Applications</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in manual_jobs %}
+                        <tr>
+                            <td><a class="job-title job-link" href="{% url 'admin_job_detail' job.pk %}">{{ job.title }}</a></td>
+                            <td class="muted-cell">{{ job.location }}</td>
+                            <td class="muted-cell">{{ job.deadline|date:'M d, Y' }}</td>
+                            <td><span class="application-count">{{ job.applications.count }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-state">No jobs are assigned to the Manual workflow.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('[data-workflow-tab]');
+        const panels = document.querySelectorAll('[data-workflow-panel]');
+
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                const target = tab.getAttribute('data-workflow-tab');
+
+                tabs.forEach(function (button) {
+                    const isActive = button === tab;
+                    button.classList.toggle('is-active', isActive);
+                    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                });
+
+                panels.forEach(function (panel) {
+                    const visible = panel.getAttribute('data-workflow-panel') === target;
+                    panel.style.display = visible ? 'block' : 'none';
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

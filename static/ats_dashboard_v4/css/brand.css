@@ -1,0 +1,11 @@
+.sidebar{background:#2f79b7;color:#fff}
+.brand{border-bottom-color:#ffffff38}
+.brandmark{width:44px;height:44px;flex:0 0 44px;background:transparent url("../img/telikom-logo.svg") center/contain no-repeat;color:transparent;font-size:0}
+.brand strong{letter-spacing:.02em}
+.brand small{color:#e0edf7}
+.navlabel{color:#d2e5f4}
+.navitem{color:#f2f7fb}
+.navitem.active,.navitem:hover{background:#24669f;color:#fff}
+.navitem b{color:#dbeaf5}
+.sidebarfoot,.miniuser{border-color:#ffffff38}
+.status,.miniuser small{color:#dbeaf5}

@@ -1,0 +1,126 @@
+AI-SUPPORTED RECRUITMENT: COMBINED PIPELINE
+
+PURPOSE
+
+Use AI at three points in recruitment: compare a resume with the job requirements, prepare useful interview questions, and help assess interview answers. The goal is to help the hiring team select one candidate to hire, not to let an AI model make the hiring decision. The sequence and assessment rules can vary by job or application type.
+
+IMPLEMENTATION STATUS
+
+Resume screening is implemented in the current project. AI-generated interview questions and interview audio transcription/assessment are planned features; the current Interviews page is a placeholder. The pipeline below joins the working screening stage with the intended interview stages without presenting planned features as already available.
+
+END-TO-END PIPELINE
+
+1. Define the role
+
+A recruiter creates a job and adds criteria and requirements. These give AI a role-specific basis for reviewing applications and, later, preparing interview questions. The current data model supports required/optional requirements and a job-level screening threshold. It does not currently store criterion or question weights.
+
+2. Receive an application
+
+The applicant submits a resume and cover letter for the job. The ATS stores the application and uploaded documents, linked to the job and applicant. The application begins with a received status. The current AI screening uses the resume and job requirements; it does not send the cover letter for assessment.
+
+3. Screen the resume (implemented)
+
+The screening service reads the resume, uploads it to OpenAI when possible, and sends the resume plus the job's requirements to `gpt-4.1-mini` through `client.responses.create`. If file upload is unavailable but resume text can be extracted, that text is used instead. The model is instructed to assess each requirement using resume evidence and return a structured result: an assessment, a score from 0 to 100, and concise evidence for every requirement, along with overall comments.
+
+The application calculates its overall score as the average of the requirement scores, validates that each requirement has exactly one result, and saves the overall and requirement-level results. In the automated workflow, a score meeting the job threshold can move the application to shortlisted; otherwise it is marked screened. In the semi-automated workflow, it is marked screened for recruiter review. These scores are decision support, not a final hiring decision. Current requirement scores are not weighted.
+
+4. Prepare interview questions (planned)
+
+For shortlisted candidates, AI can create two complementary sets of questions:
+
+- Shared questions based on the job requirements, asked consistently across candidates for the same role.
+- Candidate-specific follow-ups based on the candidate's resume and screening evidence, to clarify experience or explore relevant examples.
+
+The hiring team reviews, edits, removes, or adds questions before use. Interviewers set each question's importance in advance so candidates are assessed against an agreed rubric. The AI may suggest question wording, but it should not assign the importance weights. A structured `client.responses.create` request, similar to the existing screening call, could generate questions grounded in the role and candidate information.
+
+5. Conduct and capture the interview (planned)
+
+An interviewer signs in to the proposed desktop application, chooses the job and candidate, and sees the approved shared and candidate-specific questions. The interviewer can enter scores manually, use AI-assisted assessment, or combine both. The interview may be recorded live or provided as a recording. Obtain consent and protect access to recordings and transcripts.
+
+6. Transcribe and assess answers (planned)
+
+An audio transcription call, such as `client.audio.transcriptions.create`, can convert the recording to text. A separate Responses API call can compare each answer with its question, the relevant job requirements, and the agreed rubric. The AI should return a suggested score with transcript evidence and identify unclear or missing evidence rather than infer an answer. Apply the pre-agreed question weights transparently; allow interviewers to review and adjust the assessment. Transcription and answer scoring are separate AI steps.
+
+7. Review and choose the candidate
+
+Bring the resume assessment, interview transcript, answer evidence, manual scores, and relevant application details together for the recruiter and panel. They review the complete record, follow the workflow configured for that role or application type, and choose the final candidate. AI can organize evidence and highlight alignment with requirements; it should not automatically reject, rank as a final authority, or hire someone without human review.
+
+CURRENT LIMITS AND DESIGN POINTS
+
+- The existing `gpt-4.1-mini` Responses API integration is used for resume screening only.
+- The current screening model returns requirement assessments, scores, and evidence; the application computes the overall average and saves the result.
+- The interview-question generator, desktop recording, audio transcription, weighted interview scoring, and final hiring decision flow are not implemented yet.
+- The current application status choices include received, screened, shortlisted, interviewed, and rejected; there is no dedicated hired status or interview record model in the current project.
+- Before adding weights, define how they affect an assessment and show that calculation to reviewers. Keep human review and configurable workflows for different hiring processes.
+
+PROJECT ANCHORS
+
+- `screening.py`: current resume reading, OpenAI Responses API request, structured assessment validation, and overall-score calculation.
+- `application_screening/views.py`: screening request handling, status changes, and result persistence.
+- `application_screening/models.py`: saved overall and requirement-level screening results.
+- `job_application/models.py`: jobs, requirements, applications, and current application statuses.
+- `static/ats_dashboard_v4/js/interviews.js`: current interview UI placeholder.
+
+BUSINESS OUTCOMES: TIME AND COST
+
+The business case is to automate repeatable preparation and documentation work, give recruiters structured evidence, and leave the final selection to people. The project contains no measured manual processing times, loaded staff cost, question-generation usage, or interview recordings. Therefore, exact organization-wide time savings and total operating cost are not yet established. The figures below distinguish project estimates from published API prices and hypothetical examples.
+
+1. Resume screening (implemented)
+
+Manual comparison requires a recruiter to read each resume, compare it with job requirements, and record findings. The current AI workflow performs a structured requirement-by-requirement comparison, returns evidence and scores, calculates the average score, and saves results for review. This can reduce repetitive first-pass reading and note structuring, and it makes the assessment format consistent. It does not eliminate recruiter review or establish that the model is more accurate than a person.
+
+The existing project design estimates 3-5 seconds of model processing per application, or roughly 5-9 minutes for 100 applications processed sequentially. This is a planning estimate, not a measured service-level result; file handling, network delays, errors, and recruiter review add time. Compare with a measured manual baseline using:
+
+	Net recruiter time saved = (manual minutes per resume x number of resumes)
+							  - AI-assisted review minutes
+							  - exception and correction minutes
+
+For a cost illustration, the design document assumes 4,000-8,000 input tokens and 600-1,200 output tokens per ordinary, text-heavy resume. OpenAI's current standard GPT-4.1 mini rates are US$0.40 per million input tokens and US$1.60 per million output tokens. At those assumptions, estimated model cost is US$0.00256-US$0.00512 per application; a midpoint of 6,000 input and 900 output tokens is US$0.00384. US$5 therefore covers about 980-1,950 such screenings on paper, with a midpoint of about 1,300. This is an estimate, not a quota. Actual PDF page-image usage, longer resumes, requirements, retries, or price changes can increase cost. It excludes recruiter time, implementation, hosting, and other operating costs.
+
+2. AI-generated interview questions (planned)
+
+Preparing questions manually means drafting shared role questions and separately reviewing each shortlisted candidate's resume to develop useful follow-ups. AI could draft the shared set once per role and produce candidate-specific questions from that candidate's resume, screening evidence, and the same job requirements. This shifts effort from drafting to review and editing, while supporting consistent questions across candidates. It does not save interview delivery time, and all proposed questions still need human approval.
+
+No question-generation API call or token usage exists in the project, so a defensible per-candidate cost or time-saving figure is not available yet. If implemented with GPT-4.1 mini, the text-generation cost can be calculated from actual usage:
+
+	Request cost = (input tokens x US$0.40 + output tokens x US$1.60) / 1,000,000
+
+If one approved shared set is reused across candidates, its generation cost is one request per role; candidate-specific generation is one request per shortlisted candidate, subject to actual prompt and response sizes. Measure manual drafting time against AI generation plus recruiter review time during a pilot.
+
+3. Interview transcription and answer analysis (planned)
+
+Manual interviews require interviewers to listen, take notes, and later organize evidence against the interview questions. AI could produce a searchable transcript and draft question-linked evidence and scores using the agreed rubric. This could reduce manual transcription and note consolidation and make the evidence easier to revisit. It cannot shorten the interview itself, and a person should correct transcription errors and review the suggested assessment.
+
+OpenAI's published pricing lists `gpt-transcribe` at an estimated US$0.0045 per audio minute for completed recordings. At that rate, a 30-minute recording costs about US$0.135 and a 60-minute recording about US$0.27 for transcription alone; US$5 corresponds to roughly 1,111 audio minutes. For live transcription, the listed `gpt-live-transcribe` rate is US$0.017 per minute, or US$1.02 per hour; US$5 corresponds to about 294 minutes. These are different API paths and should not be conflated. If interviewer/candidate speaker labels are required for a completed recording, the listed `gpt-4o-transcribe-diarize` rate is US$0.006 per minute, or US$0.36 for a 60-minute recording. Transcript-based answer scoring is a separate text-model request and adds token charges. These estimates exclude recording storage, desktop-app development, human review, and other operating costs.
+
+The project has no interview audio, transcription feature, or post-interview time baseline. Measure interview length, manual note/transcription time, transcript correction time, assessment review time, and actual API usage before claiming a time saving. Recording consent and secure access/retention need to be addressed before rollout.
+
+COMBINED COST EXAMPLE (ILLUSTRATIVE ONLY)
+
+For 100 resume screenings at the midpoint estimate above, plus 10 shortlisted candidates each having one 60-minute interview transcribed with `gpt-transcribe`:
+
+- Resume screening estimate: 100 x US$0.00384 = US$0.384.
+- Audio transcription estimate: 10 x 60 minutes x US$0.0045 = US$2.70.
+- Known API subtotal: US$3.084 (about US$3.08).
+
+This subtotal excludes question-generation calls, transcript-answer analysis, PDF image-token variation, retries, and all human and operational costs. It is not the total project cost or a claim that US$5 will cover the complete workflow. The final cost must use recorded token usage, actual interview minutes, chosen models, and current prices.
+
+MEASURING NET BUSINESS VALUE
+
+Run a pilot on comparable applications and interviews. Record the manual baseline and AI-assisted time for each stage, including human review and corrections; capture model token usage and audio minutes from API responses. Report median and range as well as totals, and keep quality checks separate from speed. Calculate:
+
+	Net time saved = manual staff time - AI-assisted staff time
+	Net labor value = net hours saved x organization-approved loaded hourly rate
+	Net financial benefit = net labor value - API charges - incremental operating costs
+
+Do not report a quantified time, cost, accuracy, or fairness improvement until measured against that baseline. The evidence-supported outcome today is that screening automates structured comparison and record creation; the two interview features remain proposed capabilities.
+
+RESEARCH SOURCES
+
+Official OpenAI sources checked October 2, 2026:
+
+- GPT-4.1 mini model and token prices: https://developers.openai.com/api/docs/models/gpt-4.1-mini/
+- API pricing, including transcription model estimates: https://developers.openai.com/api/docs/pricing/
+- Speech-to-text model selection and transcription API: https://developers.openai.com/api/docs/guides/speech-to-text/
+- Audio workflow guidance, including file transcription versus live transcription: https://developers.openai.com/api/docs/guides/audio/
+- Responses API file inputs and PDF usage considerations: https://developers.openai.com/api/docs/guides/file-inputs/

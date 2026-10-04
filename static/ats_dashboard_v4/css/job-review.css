@@ -1,0 +1,386 @@
+.job-description {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 14px 0 0;
+    max-width: 1000px;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.job-criteria {
+    background: #fff;
+    border: 1px solid var(--line);
+    margin: 16px 0;
+}
+
+.job-criteria-head {
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+}
+
+.job-criteria-head h2 {
+    font-size: 13px;
+    margin: 0;
+}
+
+.job-criteria-head p,
+.job-criteria-head > span {
+    color: var(--muted);
+    font-size: 10px;
+    margin: 3px 0 0;
+}
+
+.job-criteria-list {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.job-criterion {
+    align-self: start;
+    border: 1px solid var(--line);
+    min-width: 0;
+}
+
+.job-criterion summary {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    padding: 10px 12px;
+}
+
+.job-criterion summary::-webkit-details-marker {
+    display: none;
+}
+
+.job-criterion summary strong,
+.job-criterion summary small {
+    display: block;
+}
+
+.job-criterion summary strong {
+    font-size: 11px;
+}
+
+.job-criterion summary small {
+    color: var(--muted);
+    font-size: 9px;
+    margin-top: 3px;
+}
+
+.job-criterion summary b {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.job-criterion[open] summary {
+    border-bottom: 1px solid var(--line);
+}
+
+.job-criterion ul {
+    list-style: none;
+    margin: 0;
+    padding: 4px 12px;
+}
+
+.job-criterion li {
+    border-bottom: 1px solid #edf0f2;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+    padding: 8px 0;
+}
+
+.job-criterion li:last-child {
+    border-bottom: 0;
+}
+
+.job-criterion li em {
+    color: var(--red);
+    font-size: 8px;
+    font-style: normal;
+    margin-left: 5px;
+}
+
+.job-criteria-empty {
+    color: var(--muted);
+    font-size: 11px;
+    grid-column: 1 / -1;
+    margin: 4px;
+    padding: 10px;
+}
+
+.review-layout {
+    align-items: stretch;
+    grid-template-columns: minmax(290px, 320px) minmax(0, 1fr);
+}
+
+.candidate-panel,
+.assessment-panel {
+    height: min(76vh, 860px);
+    min-height: 560px;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.candidate-panel {
+    border-right: 1px solid var(--line);
+}
+
+.assessment-panel {
+    grid-column: auto;
+}
+
+.candidate-row {
+    cursor: pointer;
+}
+
+.candidate-row {
+    grid-template-columns: 24px minmax(0, 1fr) 82px 52px;
+    gap: 10px;
+    padding: 15px 16px;
+}
+
+.candidate-panel-head h3 {
+    font-size: 15px;
+}
+
+.candidate-panel-head small,
+.candidate-panel .legend {
+    font-size: 11px;
+}
+
+.candidate-info strong {
+    font-size: 13px;
+}
+
+.candidate-info small {
+    font-size: 11px;
+}
+
+.review-status {
+    font-size: 10px;
+    padding: 4px 6px;
+}
+
+.candidate-score {
+    font-size: 13px;
+}
+
+.review-toolbar > div:first-child strong {
+    font-size: 15px;
+}
+
+.review-toolbar > div:first-child small,
+.review-toolbar .count-pill {
+    font-size: 11px;
+}
+
+.review-toolbar-actions select,
+.review-toolbar-actions button {
+    font-size: 12px;
+    min-height: 38px;
+}
+
+.review-layout.candidate-list-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.review-layout.candidate-list-collapsed .candidate-panel {
+    display: none;
+}
+
+.candidate-review {
+    padding: 4px 26px 30px;
+}
+
+.review-top {
+    gap: 24px;
+    padding: 22px 0 18px;
+}
+
+.review-top h2 {
+    font-size: 25px;
+}
+
+.review-top p {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.review-top .eyebrow {
+    font-size: 11px;
+}
+
+.review-score small {
+    font-size: 12px;
+}
+
+.review-score strong {
+    font-size: 42px;
+}
+
+.live-assessment-meta {
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.assessment-note {
+    margin: 18px 0;
+    padding: 14px 16px;
+}
+
+.assessment-note strong {
+    font-size: 13px;
+}
+
+.assessment-note span {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.criteria-section {
+    margin-top: 16px;
+}
+
+.criteria-section-head {
+    padding: 14px 16px;
+}
+
+.criteria-section-head h3 {
+    font-size: 15px;
+}
+
+.criteria-section-head small {
+    font-size: 11px;
+}
+
+.criteria-section-head > strong {
+    font-size: 20px;
+}
+
+.requirement-grid {
+    padding: 4px 16px;
+}
+
+.requirement {
+    padding: 14px 0;
+}
+
+.req-top span,
+.req-top b {
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.req-top em {
+    font-size: 9px;
+}
+
+.scorebar {
+    height: 8px;
+    margin: 8px 0 6px;
+}
+
+.assessment-panel .requirement small {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.review-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 15px 0;
+}
+
+.review-actions button,
+.review-actions select {
+    font-size: 12px;
+    min-height: 38px;
+}
+
+.review-empty {
+    font-size: 13px;
+    padding: 40px 24px;
+}
+
+.candidate-row {
+    grid-template-columns: minmax(0, 1fr) 75px 48px;
+}
+
+.candidate-info .candidate-name-link {
+    display: block;
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.candidate-info .candidate-name-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.candidate-row[aria-current="true"] {
+    background: #eef3ff;
+    box-shadow: inset 3px 0 var(--blue);
+}
+
+.live-review-empty {
+    color: var(--muted);
+    font-size: 11px;
+    padding: 18px 14px;
+}
+
+.live-assessment-meta {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+@media (max-width: 800px) {
+    .job-criteria-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .job-criteria-list {
+        grid-template-columns: 1fr;
+        max-height: 260px;
+    }
+
+    .review-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .candidate-panel,
+    .assessment-panel {
+        height: min(58vh, 560px);
+        min-height: 280px;
+    }
+
+    .candidate-review {
+        padding: 4px 16px 24px;
+    }
+
+    .review-score strong {
+        font-size: 36px;
+    }
+
+    .requirement-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,7 @@
+application received,
+    the query which workflow the job is attached to.. 
+        if automated: 
+            use automated worflow, process the application. 
+        else: if semi auto use semi auto workflow
+
+        else if manual use the manual workflow.. 

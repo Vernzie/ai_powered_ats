@@ -1,0 +1,18 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Jobs | Admin dashboard{% endblock %}
+
+{% block dashboard_content %}
+<header class="dashboard-heading"><div><p class="eyebrow">Admin workspace</p><h1>Jobs</h1></div><div class="row-actions"><span class="access-label">{{ total_jobs }} listings</span><a class="submit-button" href="{% url 'job_create' %}">Create job</a></div></header>
+{% if messages %}<div class="panel" style="margin-bottom: 20px; padding: 16px;">{% for message in messages %}<p style="margin: 0; color: var(--accent-dark);">{{ message }}</p>{% endfor %}</div>{% endif %}
+<section class="section-block" aria-labelledby="jobs-heading">
+    <div class="section-heading"><h2 id="jobs-heading">Job listings</h2><span class="section-count">Manage roles</span></div>
+    <div class="panel">
+        {% if jobs %}
+        <table class="data-table"><thead><tr><th>Role</th><th>Location</th><th>Workflow</th><th>Deadline</th><th>Applications</th><th>Actions</th></tr></thead><tbody>
+        {% for job in jobs %}<tr><td><a class="job-title job-link" href="{% url 'admin_job_detail' job.pk %}">{{ job.title }}</a></td><td class="muted-cell">{{ job.location }}</td><td class="muted-cell"><span class="workflow-badge">{{ job.workflow.name|default:'Unassigned' }}</span></td><td class="muted-cell">{{ job.deadline|date:'M d, Y' }}</td><td><span class="application-count">{{ job.application_count }}</span></td><td><div class="row-actions"><a class="action-link" href="{% url 'job_update' job.pk %}">Edit</a><a class="action-link" href="{% url 'dashboard_job_screening' job.pk %}">AI workflow</a><form method="post" action="{% url 'job_delete' job.pk %}">{% csrf_token %}<button class="action-button danger" type="submit">Delete</button></form></div></td></tr>{% endfor %}
+        </tbody></table>
+        {% else %}<p class="empty-state">No jobs have been created yet.</p>{% endif %}
+    </div>
+</section>
+{% endblock %}

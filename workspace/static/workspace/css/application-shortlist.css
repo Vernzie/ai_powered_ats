@@ -1,0 +1,43 @@
+.shortlist-page{display:grid;gap:18px;max-width:1500px;margin:0 auto;padding:12px 0 30px;color:var(--ink)}
+.shortlist-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.shortlist-heading h1{margin:0;font-size:28px;line-height:1.15}
+.shortlist-heading p:not(.eyebrow){margin:6px 0 0;color:var(--muted);font-size:13px}
+.shortlist-heading .eyebrow,.shortlist-panel-heading .eyebrow{margin-bottom:7px}
+.shortlist-back-link{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 11px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap}
+.shortlist-back-link:hover{border-color:var(--blue);color:var(--blue)}
+.shortlist-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);align-items:start;gap:16px}
+.shortlist-review-panel,.shortlist-queue-panel{min-width:0;min-height:460px;border:1px solid var(--line);background:#fff;padding:18px}
+.shortlist-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.shortlist-panel-heading h2{margin:0;font-size:18px}
+.shortlist-overall-score{font-size:26px;font-weight:800;line-height:1}
+.shortlist-review-content{display:grid;gap:16px}
+.shortlist-candidate-summary{display:grid;gap:4px}
+.shortlist-candidate-summary h3{margin:0;font-size:19px}
+.shortlist-candidate-summary p,.shortlist-review-meta{margin:0;color:var(--muted);font-size:12px}
+.shortlist-ai-summary{padding:12px;border-left:3px solid var(--blue);background:#f8fafc}
+.shortlist-ai-summary strong{display:block;margin-bottom:5px;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.shortlist-ai-summary p{margin:0;color:var(--ink);font-size:12px;line-height:1.55}
+.shortlist-criterion{display:grid;gap:8px}
+.shortlist-criterion h3{margin:0;padding-bottom:7px;border-bottom:1px solid var(--line);font-size:14px}
+.shortlist-requirement{padding:10px 0;border-bottom:1px solid var(--line)}
+.shortlist-requirement-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.shortlist-requirement-heading strong{font-size:12px;line-height:1.45}
+.shortlist-requirement-score{flex:none;font-size:12px;font-weight:750;white-space:nowrap}
+.shortlist-requirement small{display:block;margin-top:5px;color:var(--muted);font-size:11px;line-height:1.45}
+.shortlist-required-tag{margin-left:5px;color:var(--red);font-size:9px;font-weight:700}
+.shortlist-candidate-list{display:grid;gap:8px}
+.shortlist-candidate{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px;border:1px solid var(--line);background:#fff}
+.shortlist-candidate.is-current{border-color:#cbd8ff;background:#f0f4ff}
+.shortlist-candidate-info{min-width:0}
+.shortlist-candidate-info strong,.shortlist-candidate-info small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shortlist-candidate-info strong{font-size:12px}
+.shortlist-candidate-info small{margin-top:3px;color:var(--muted);font-size:10px}
+.shortlist-view-button{padding:7px 9px;border:1px solid var(--line);background:#fff;color:var(--blue);font-size:10px;font-weight:700;cursor:pointer}
+.shortlist-view-button:hover{border-color:var(--blue)}
+.shortlist-empty{margin:0;padding:22px;color:var(--muted);font-size:12px;text-align:center}
+.shortlist-actions{position:sticky;bottom:0;z-index:2;display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:12px 0;background:rgba(245,247,251,.96);border-top:1px solid var(--line)}
+.shortlist-selection-count{color:var(--muted);font-size:11px}
+.shortlist-submit-button{min-height:42px;padding:10px 16px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.shortlist-submit-button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:900px){.shortlist-layout{grid-template-columns:1fr}.shortlist-review-panel{order:1}.shortlist-queue-panel{order:2}}
+@media(max-width:600px){.shortlist-page{padding-top:6px}.shortlist-heading{align-items:flex-start;flex-direction:column}.shortlist-heading h1{font-size:23px}.shortlist-review-panel,.shortlist-queue-panel{min-height:0;padding:13px}.shortlist-actions{align-items:stretch;flex-direction:column}.shortlist-submit-button{width:100%}}

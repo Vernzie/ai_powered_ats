@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+    <div class="auth-layout">
+        <div class="auth-intro">
+            <p class="auth-eyebrow">Make your move</p>
+            <h1>Make room for what is next.</h1>
+            <p>Build your profile once, then find opportunities that meet you where you are.</p>
+        </div>
+
+        <div class="auth-card">
+            <h2>Create an account</h2>
+            <p class="auth-card-intro">Join Workroom as an applicant.</p>
+
+            <form class="auth-form" method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="form-errors">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="form-field">
+                    {{ form.first_name.label_tag }}
+                    {{ form.first_name }}
+                    {{ form.first_name.errors }}
+                </div>
+
+                <div class="form-field">
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name }}
+                    {{ form.last_name.errors }}
+                </div>
+
+                <div class="form-field">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                    {{ form.username.errors }}
+                </div>
+
+                <div class="form-field">
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+
+                <div class="form-field">
+                    {{ form.password1.label_tag }}
+                    <div class="password-wrap">
+                        {{ form.password1 }}
+                        <button class="password-toggle" type="button" data-password-toggle="id_password1">Show</button>
+                    </div>
+                    {{ form.password1.errors }}
+                </div>
+
+                <div class="form-field">
+                    {{ form.password2.label_tag }}
+                    <div class="password-wrap">
+                        {{ form.password2 }}
+                        <button class="password-toggle" type="button" data-password-toggle="id_password2">Show</button>
+                    </div>
+                    {{ form.password2.errors }}
+                </div>
+
+                <button class="auth-submit" type="submit">Create account</button>
+            </form>
+
+            <p class="auth-switch">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

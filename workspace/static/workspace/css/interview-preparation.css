@@ -1,0 +1,70 @@
+.interview-preparation-page{display:grid;gap:18px;max-width:1600px;margin:0 auto;padding:12px 0 30px;color:var(--ink)}
+.interview-preparation-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.interview-preparation-heading h1{margin:0;font-size:28px;line-height:1.15}
+.interview-preparation-heading p:not(.eyebrow){margin:6px 0 0;color:var(--muted);font-size:13px}
+.interview-preparation-heading .eyebrow,.interview-preparation-panel-heading .eyebrow{margin-bottom:7px}
+.interview-application-picker{position:relative;display:grid;gap:5px;width:min(100%,460px);margin-top:12px;color:var(--muted);font-size:10px;font-weight:700}
+.interview-application-picker-label{font-size:10px;font-weight:700}
+.interview-application-select{display:flex;align-items:center;gap:12px;width:100%;min-height:46px;padding:7px 10px;border:1px solid var(--line);background:#fff;color:var(--ink);text-align:left;cursor:pointer}
+.interview-application-option-info{display:grid;gap:3px;min-width:0;flex:1}
+.interview-application-option-info strong{overflow:hidden;color:var(--ink);font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+.interview-application-option-info small{overflow:hidden;color:var(--muted);font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.interview-application-question-count{flex:none;color:var(--muted);font-size:10px;font-weight:700;text-align:right;white-space:nowrap}
+.interview-application-chevron{width:8px;height:8px;flex:none;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);transition:transform .15s ease}
+.interview-application-select[aria-expanded="true"] .interview-application-chevron{transform:rotate(225deg)}
+.interview-application-options{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:5;display:grid;max-height:260px;overflow-y:auto;border:1px solid var(--line);background:#fff;box-shadow:0 8px 20px rgba(20,35,55,.14)}
+.interview-application-options[hidden]{display:none}
+.interview-application-option{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:8px 10px;border:0;border-bottom:1px solid var(--line);background:#fff;text-align:left;cursor:pointer}
+.interview-application-option:last-child{border-bottom:0}
+.interview-application-option:hover,.interview-application-option[aria-selected="true"]{background:#f0f4ff}
+.interview-preparation-back,.interview-add-question,.interview-remove-question{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 11px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer}
+.interview-preparation-back:hover,.interview-add-question:hover,.interview-remove-question:hover{border-color:var(--blue);color:var(--blue)}
+.interview-preparation-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:16px}
+.interview-preparation-panel{min-width:0;border:1px solid var(--line);background:#fff;padding:18px}
+.interview-preparation-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.interview-preparation-panel-heading h2{margin:0;font-size:18px}
+.interview-ai-generator{display:grid;gap:10px;margin:0 0 14px;padding:13px;border:1px solid var(--line);background:#f8fafc}
+.interview-ai-generator .interview-question-field textarea{min-height:78px}
+.interview-ai-generator-actions{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.interview-ai-generator-actions .interview-question-field{width:min(100%,170px)}
+.interview-generate-questions{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:9px 13px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-size:11px;font-weight:700;cursor:pointer}
+.interview-generate-questions:hover{filter:brightness(.94)}
+.interview-generate-questions:disabled{opacity:.65;cursor:wait}
+.interview-ai-spinner{display:none;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:interview-ai-spin .7s linear infinite}
+.interview-generate-questions.is-loading .interview-ai-spinner{display:inline-block}
+@keyframes interview-ai-spin{to{transform:rotate(360deg)}}
+.interview-ai-feedback{min-height:16px;margin:0;color:var(--muted);font-size:11px}
+.interview-ai-feedback.is-error{color:var(--red)}
+.interview-resume-frame{display:block;width:100%;aspect-ratio:210 / 297;border:1px solid var(--line);background:#f5f7fa}
+.interview-resume-fallback{display:grid;min-height:260px;align-content:center;justify-items:start;gap:10px;padding:24px;border:1px dashed var(--line);background:#f8fafc;color:var(--muted);font-size:12px}
+.interview-resume-fallback p{margin:0}
+.interview-resume-fallback a{color:var(--blue);font-weight:700}
+.interview-question-list{display:grid;gap:12px}
+.interview-question-card{display:grid;gap:12px;padding:14px;border:1px solid var(--line);background:#fbfcfe}
+.interview-question-card-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.interview-question-card-heading strong{font-size:12px}
+.interview-question-actions{position:relative}
+.interview-question-menu-toggle{display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:20px;line-height:1;cursor:pointer}
+.interview-question-menu{position:absolute;top:calc(100% + 4px);right:0;z-index:3;display:grid;min-width:120px;padding:4px;border:1px solid var(--line);background:#fff;box-shadow:0 6px 16px rgba(20,35,55,.12)}
+.interview-question-menu[hidden]{display:none}
+.interview-question-menu button{border:0;background:#fff;padding:8px 10px;color:var(--ink);font-size:11px;text-align:left;cursor:pointer}
+.interview-question-menu button:hover{background:#f2f5fa}
+.interview-question-summary p{margin:0;color:var(--ink);font-size:13px;line-height:1.55;white-space:pre-wrap}
+.interview-question-summary small{display:block;margin-top:8px;color:var(--muted);font-size:10px}
+.interview-question-expected{margin-top:10px;padding:10px;border-left:3px solid var(--blue);background:#f3f6fc}
+.interview-question-expected strong{font-size:10px;color:var(--muted)}
+.interview-question-expected p{margin:5px 0 0;color:var(--ink);font-size:12px;line-height:1.5;white-space:pre-wrap}
+.interview-question-optional{font-size:9px;font-weight:500}
+.interview-question-fields{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px}
+.interview-question-field{display:grid;gap:5px;color:var(--muted);font-size:10px;font-weight:700}
+.interview-question-field select,.interview-question-field input,.interview-question-field textarea{width:100%;min-width:0;border:1px solid var(--line);background:#fff;color:var(--ink);font:12px Arial,sans-serif;padding:9px 10px}
+.interview-question-field select,.interview-question-field input{height:38px}
+.interview-question-field textarea{min-height:96px;resize:vertical;line-height:1.5}
+.interview-remove-question{min-height:30px;padding:5px 8px;color:var(--red)}
+.interview-question-edit-actions{display:flex;flex-wrap:wrap;gap:8px}
+.interview-question-save,.interview-question-cancel{min-height:34px;padding:7px 10px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-size:11px;font-weight:700;cursor:pointer}
+.interview-question-cancel{border-color:var(--line);background:#fff;color:var(--ink)}
+.interview-question-save:disabled,.interview-question-cancel:disabled{opacity:.5;cursor:wait}
+.interview-question-error{margin:0;color:var(--red);font-size:11px}
+@media(max-width:900px){.interview-preparation-layout{grid-template-columns:1fr}}
+@media(max-width:600px){.interview-preparation-page{padding-top:6px}.interview-preparation-heading{align-items:flex-start;flex-direction:column}.interview-preparation-heading h1{font-size:23px}.interview-preparation-panel{padding:13px}.interview-question-fields{grid-template-columns:1fr}.interview-preparation-panel-heading{align-items:flex-start}.interview-ai-generator-actions{align-items:stretch;flex-direction:column}.interview-ai-generator-actions .interview-question-field{width:100%}.interview-generate-questions{width:100%}.interview-application-picker{width:100%}}

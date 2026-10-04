@@ -1,0 +1,39 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Overview | Admin dashboard{% endblock %}
+
+{% block dashboard_content %}
+<header class="dashboard-heading">
+    <div>
+        <p class="eyebrow">Admin workspace</p>
+        <h1>Overview</h1>
+    </div>
+</header>
+
+<section class="overview-grid" aria-label="Workspace totals">
+    <article class="stat-card">
+        <span class="stat-label">Jobs</span>
+        <strong class="stat-value">{{ total_jobs }}</strong>
+    </article>
+    <article class="stat-card">
+        <span class="stat-label">Applications</span>
+        <strong class="stat-value">{{ total_applications }}</strong>
+    </article>
+    <article class="stat-card">
+        <span class="stat-label">Awaiting screening</span>
+        <strong class="stat-value">{{ applied_applications }}</strong>
+    </article>
+</section>
+
+<section class="section-block">
+    <div class="section-heading">
+        <h2>Workspace</h2>
+    </div>
+    <div class="row-actions">
+        <a class="action-link" href="{% url 'dashboard_jobs' %}">Manage jobs</a>
+        <a class="action-link" href="{% url 'dashboard_applications' %}">Manage applications</a>
+        <a class="action-link" href="{% url 'dashboard_screening' %}">AI screening</a>
+        <a class="submit-button" href="{% url 'job_create' %}">Create job</a>
+    </div>
+</section>
+{% endblock %}

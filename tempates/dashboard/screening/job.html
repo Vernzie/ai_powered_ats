@@ -1,0 +1,577 @@
+{% extends 'dashboard/atlas_shell.html' %}
+
+{% block title %}Review {{ job.title }}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .screening-stage { animation: screening-enter .28s ease both; }
+    .screening-stage[hidden] { display: none; }
+    .stage-shell { display: block; }
+    .criteria-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 12px; }
+    .criteria-item { background: #f7fafb; border: 1px solid #dfe7ed; padding: 16px; position: relative; }
+    .criteria-item-header { align-items: flex-start; display: flex; gap: 12px; justify-content: space-between; }
+    .criteria-item h3 { margin: 0 0 8px; }
+    .criteria-item ul { margin: 8px 0 0; padding-left: 18px; color: #485b68; }
+    .criteria-menu-wrap { position: relative; }
+    .criteria-menu-toggle { background: transparent; border: 1px solid var(--line); color: var(--ink); cursor: pointer; font-size: 1.25rem; line-height: 1; min-width: 32px; padding: 6px 8px; }
+    .criteria-menu { background: #fff; border: 1px solid #dfe7ed; box-shadow: 0 12px 26px rgba(15, 23, 42, .08); min-width: 160px; padding: 8px; position: absolute; right: 0; top: calc(100% + 6px); z-index: 2; }
+    .criteria-menu button { background: transparent; border: 0; color: var(--ink); cursor: pointer; display: block; font: .8rem Arial, sans-serif; padding: 8px 10px; text-align: left; width: 100%; }
+    .criteria-menu button:hover { background: #f5f7fa; }
+    .criteria-menu .danger { color: #b91c1c; }
+    .criteria-toolbar { align-items: center; display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; }
+    .criteria-form-wrapper { display: none; margin-top: 18px; }
+    .criteria-form-wrapper.is-open { display: block; }
+    .criteria-form { display: grid; gap: 14px; }
+    .criteria-edit-form { display: none; gap: 14px; margin-top: 18px; }
+    .criteria-edit-form.is-open { display: grid; }
+    .field { display: grid; gap: 7px; }
+    .field label { font: 700 .72rem Arial, sans-serif; }
+    .field input, .field textarea { background: #fffdf8; border: 1px solid var(--line); color: var(--ink); font: .84rem Arial, sans-serif; padding: 11px 12px; width: 100%; box-sizing: border-box; }
+    .field textarea { min-height: 100px; resize: vertical; }
+    .field small { color: var(--muted); font: .72rem Arial, sans-serif; }
+    .criteria-form-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .screening-shell { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+    .screening-main { display: grid; gap: 18px; min-width: 0; }
+    .screening-side { position: sticky; top: 18px; }
+    .screening-rail { background: #fff; border: 1px solid #e3e8ed; box-shadow: 0 10px 28px rgba(15, 23, 42, .05); max-height: 72vh; overflow-y: auto; }
+    .screening-rail .application-list { margin: 0; padding: 0 22px 22px; }
+    .screening-rail .application-item { align-items: flex-start; border-top: 1px solid #e7ebee; display: flex; gap: 12px; padding: 14px 0; }
+    .screening-rail .application-item:first-child { border-top: 0; }
+    .screening-rail .application-item strong, .screening-rail .application-item small { display: block; }
+    .screening-rail .application-item small { color: #71808a; font: .72rem Arial, sans-serif; margin-top: 4px; }
+    .screening-rail .application-item label { flex: 1; }
+    .screening-rail .selection-summary { padding: 22px 22px 0; }
+    .screening-rail .sidebar-actions { display: grid; gap: 12px; padding: 18px 22px 0; }
+    .screening-rail .sidebar-actions .selection-actions { margin-top: 0; }
+    .screening-rail .sidebar-actions .criteria-toolbar { margin-top: 0; }
+    .review-workspace { display: grid; gap: 14px; grid-template-columns: minmax(190px, .2fr) minmax(0, 1fr) minmax(250px, .3fr); min-height: calc(100vh - 190px); transition: grid-template-columns .25s ease; }
+    .review-workspace.job-hidden { grid-template-columns: 0 minmax(0, 1fr) minmax(250px, .3fr); }
+    .screening-pane, .selection-card { background: #fff; border: 1px solid #e3e8ed; min-width: 0; overflow: auto; padding: 22px; box-shadow: 0 10px 28px rgba(15, 23, 42, .05); }
+    .selection-card h2, .screening-pane h2 { margin-top: 0; }
+    .sidebar-tab-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 18px 18px 8px; }
+    .sidebar-panel { display: none; }
+    .sidebar-panel.is-active { display: block; }
+    .screened-list-item { align-items: center; display: flex; justify-content: space-between; gap: 12px; }
+    .screened-item-meta { flex: 1; min-width: 0; }
+    .view-results-button { background: #0b5bcc; border: 0; color: #fff; display: inline-flex; align-items: center; justify-content: center; font: 600 .75rem Arial, sans-serif; min-height: 34px; padding: 0 12px; text-decoration: none; }
+    .selection-job { background: #edf4ff; border-left: 4px solid #0b5bcc; }
+    .selection-job h2 { color: #0a3d8f; margin-bottom: 8px; }
+    .selection-job p, .job-pane p { color: #52616b; font: .86rem Arial, sans-serif; line-height: 1.6; }
+    .application-list { list-style: none; margin: 14px 0 0; padding: 0; }
+    .application-item { align-items: center; border-top: 1px solid #e7ebee; display: flex; gap: 12px; padding: 14px 0; }
+    .application-item label { flex: 1; }
+    .application-item strong, .application-item small { display: block; }
+    .application-item small { color: #71808a; font: .72rem Arial, sans-serif; margin-top: 4px; }
+    .selection-actions, .review-controls { align-items: center; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-top: 18px; }
+    .selection-count, .screening-status { color: #64727b; font: .76rem Arial, sans-serif; }
+    .screening-loader { align-items: center; color: #0b5bcc; display: none; font: .76rem Arial, sans-serif; gap: 8px; }
+    .screening-loader.is-visible { display: inline-flex; }
+    .spinner { animation: screening-spin .8s linear infinite; border: 3px solid #dfeafc; border-radius: 50%; border-top-color: #0b5bcc; height: 16px; width: 16px; }
+    .job-pane { opacity: 1; overflow: hidden; transition: margin-left .25s ease, opacity .25s ease, padding .25s ease; }
+    .job-hidden .job-pane { margin-left: -205px; opacity: 0; padding-left: 0; padding-right: 0; }
+    .pane-toggle { margin-bottom: 14px; }
+    .requirement-reviews { display: grid; gap: 16px; }
+    .requirement-review { background: #f9fbff; border: 1px solid #dfeafc; padding: 18px; box-shadow: 0 8px 18px rgba(11, 91, 204, .05); }
+    .requirement-review:first-child { padding-top: 18px; }
+    .requirement-title { color: #0a3d8f; font-size: 1.12rem; line-height: 1.35; margin: 0 0 12px; }
+    .review-empty { background: #f7f9fa; border: 1px solid #e9edf3; color: #71808a; font: .82rem Arial, sans-serif; padding: 15px; }
+    .review-content { background: #fff; border: 1px solid #eaf0ff; padding: 14px; }
+    .review-assessment { align-items: center; display: flex; gap: 10px; justify-content: space-between; margin: 0 0 10px; }
+    .assessment { border-radius: 999px; display: inline-block; font: 700 .64rem Arial, sans-serif; letter-spacing: .04em; padding: 5px 9px; text-transform: uppercase; }
+    .assessment-meets { background: #d8f0df; color: #176b3a; }
+    .assessment-partially_demonstrated { background: #fff0c7; color: #8a5a00; }
+    .assessment-does_not_meet { background: #f8d8d5; color: #9b3028; }
+    .assessment-not_demonstrated { background: #e4e8ec; color: #59636d; }
+    .score { color: #0b5bcc; font: 700 .82rem Arial, sans-serif; }
+    .score-bar { background: #e8edf1; border-radius: 999px; height: 8px; overflow: hidden; }
+    .score-bar-fill { background: #0b5bcc; border-radius: inherit; height: 100%; }
+    .review-evidence { color: #45545e; font: .86rem Arial, sans-serif; line-height: 1.6; margin: 11px 0 0; }
+    .overall-review { background: #edf4ff; border: 1px solid #d4e2ff; margin-bottom: 20px; padding: 16px; }
+    .overall-review h3 { color: #0a3d8f; margin: 0 0 6px; }
+    .overall-score { color: #0b5bcc; font: 700 1.7rem Arial, sans-serif; }
+    .review-application { background: transparent; border: 0; color: #22323c; cursor: pointer; display: block; padding: 0; text-align: left; width: 100%; }
+    .review-application.is-selected { background: #eef6f7; margin: -8px; padding: 8px; width: calc(100% + 16px); }
+    .review-application:hover strong { color: #0b5bcc; }
+    .review-application strong, .review-application small { display: block; }
+    .review-application small { color: #71808a; font: .72rem Arial, sans-serif; margin-top: 4px; }
+    .back-to-selection { margin-bottom: 14px; }
+    @keyframes screening-spin { to { transform: rotate(360deg); } }
+    @keyframes screening-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { .selection-layout { grid-template-columns: 1fr; }.screening-shell { grid-template-columns: 1fr; }.screening-side { position: static; }.review-workspace { grid-template-columns: 180px minmax(0, 1fr); }.review-workspace .application-pane { grid-column: 1 / -1; max-height: 350px; }.review-workspace.job-hidden { grid-template-columns: 0 minmax(0, 1fr); } }
+    @media (max-width: 650px) { .selection-layout, .review-workspace, .review-workspace.job-hidden { display: block; }.screening-pane, .selection-card { margin-bottom: 14px; }.job-hidden .job-pane { display: none; } }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<header class="review-page-heading"><div><p class="eyebrow">Application Review</p><h1>{{ job.title }}</h1><p>{{ applications|length }} applications to review · criteria and saved screening results</p></div><a class="action-link" href="{% url 'dashboard_review' %}">All review jobs</a></header>
+
+<div class="screening-shell">
+    <div class="screening-main">
+        <section id="criteria-stage" class="screening-stage">
+            <article class="selection-card stage-shell">
+                <p class="eyebrow">Job criteria</p>
+
+                <div class="criteria-toolbar">
+                    <div class="section-heading" style="margin-top: 0;"><h2>Criteria</h2><span class="section-count">{{ job.criteria.count }}</span></div>
+                </div>
+
+                {% if job.criteria.all %}
+                    <ul class="criteria-list">
+                        {% for criterion in job.criteria.all %}
+                            <li class="criteria-item" data-criterion-id="{{ criterion.pk }}">
+                                <div class="criteria-item-header">
+                                    <h3>{{ criterion.name }}</h3>
+                                    <div class="criteria-menu-wrap">
+                                        <button class="criteria-menu-toggle" type="button" aria-label="Open actions for {{ criterion.name }}" aria-expanded="false">⋯</button>
+                                        <div class="criteria-menu" hidden>
+                                            <button type="button" class="criteria-menu-action" data-action="edit" data-criterion-id="{{ criterion.pk }}">Edit</button>
+                                            <form method="post" action="">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete_criterion">
+                                                <input type="hidden" name="criterion_id" value="{{ criterion.pk }}">
+                                                <button type="submit" class="danger">Remove</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if criterion.requirements.all %}
+                                    <ul>
+                                        {% for requirement in criterion.requirements.all %}
+                                            <li>{{ requirement.description }}{% if requirement.required %}{% else %} (Nice to have){% endif %}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="empty-state">No requirements added for this criterion.</p>
+                                {% endif %}
+
+                                <form method="post" action="" class="criteria-edit-form" data-criterion-form="{{ criterion.pk }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="edit_criterion">
+                                    <input type="hidden" name="criterion_id" value="{{ criterion.pk }}">
+                                    <div class="field">
+                                        <label for="criterion_name_{{ criterion.pk }}">Criterion name</label>
+                                        <input id="criterion_name_{{ criterion.pk }}" type="text" name="criterion_name" value="{{ criterion.name }}" required>
+                                    </div>
+                                    <div class="field">
+                                        <label for="requirement_text_{{ criterion.pk }}">Requirements</label>
+                                        <textarea id="requirement_text_{{ criterion.pk }}" name="requirement_text" placeholder="One requirement per line">{% for requirement in criterion.requirements.all %}{{ requirement.description }}{% if not forloop.last %}
+{% endif %}{% endfor %}</textarea>
+                                        <small>Enter one requirement per line.</small>
+                                    </div>
+                                    <div class="criteria-form-actions">
+                                        <button class="submit-button" type="submit">Save changes</button>
+                                        <button type="button" class="btn criteria-cancel-edit">Cancel</button>
+                                    </div>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-state">No criteria configured yet. Add one to start screening.</p>
+                {% endif %}
+            </article>
+        </section>
+
+        <section id="selection-stage" class="screening-stage">
+            <article class="selection-card stage-shell">
+                <p class="eyebrow">Add job criteria</p>
+                <div class="section-heading" style="margin-top: 8px;"><h2>New criterion</h2></div>
+                <p class="empty-state" style="padding: 12px 0 0; text-align: left;">Add a screening criterion below. The right panel stays dedicated to choosing and running screening for applications.</p>
+
+                <div class="criteria-toolbar" style="margin-top: 18px;">
+                    <button id="toggle-criteria-form" class="btn" type="button">Add criteria</button>
+                </div>
+
+                <div id="criteria-form-wrapper" class="criteria-form-wrapper" hidden>
+                    <form method="post" action="" class="criteria-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_criterion">
+                        <div class="field">
+                            <label for="criterion_name">Criterion name</label>
+                            <input id="criterion_name" type="text" name="criterion_name" placeholder="Ex: Python, Leadership, Experience" required>
+                        </div>
+                        <div class="field">
+                            <label for="requirement_text">Requirement</label>
+                            <textarea id="requirement_text" name="requirement_text" placeholder="Describe the requirement the AI should evaluate" required></textarea>
+                        </div>
+                        <div class="criteria-form-actions">
+                            <button class="submit-button" type="submit">Save criterion</button>
+                            <button id="cancel-criteria-form" class="btn" type="button">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </article>
+        </section>
+    </div>
+
+    <aside class="screening-side">
+        <div class="screening-rail">
+            <div class="sidebar-tab-bar dashboard-toggle-group" role="group" aria-label="Application lists">
+                <button type="button" class="sidebar-tab dashboard-toggle is-active" data-target="new-applications-panel" aria-pressed="true">To review</button>
+                <button type="button" class="sidebar-tab dashboard-toggle" data-target="screened-applications-panel" aria-pressed="false">Screened</button>
+            </div>
+
+            <div id="new-applications-panel" class="sidebar-panel is-active">
+                <div class="section-heading selection-summary">
+                    <h2>Applications to review</h2>
+                    <span class="section-count">{{ applications|length }}</span>
+                </div>
+
+                <div class="sidebar-actions">
+                    <div class="selection-actions" style="margin-top: 0;">
+                        <span id="selection-count-rail" class="selection-count">0 selected</span>
+                        <span id="selection-loader" class="screening-loader"><span class="spinner" aria-hidden="true"></span>Running screening...</span>
+                        <button id="run-screening" class="submit-button" type="button" {% if not job.criteria.exists %}disabled{% endif %}>Run / rerun selected</button>
+                        <button id="stop-screening" class="btn" type="button" hidden style="background:#fff; border:1px solid #d0d7de; color:#8a1d1d;">Stop screening</button>
+                    </div>
+                    <p id="selection-status" class="screening-status" role="status">{% if not job.criteria.exists %}Add a criterion before screening.{% else %}Select one or more applicants to run or rerun screening.{% endif %}</p>
+                </div>
+
+                {% if applications %}
+                    <div class="selection-summary" style="padding-top: 0;">
+                        <label><input id="select-all" type="checkbox"> Select all applications</label>
+                    </div>
+                    <ul class="application-list">
+                        {% for application in applications %}
+                            <li class="application-item">
+                                    <input class="screen-choice" type="checkbox" value="{{ application.pk }}" id="screen-{{ application.pk }}" {% if request.GET.application == application.pk|stringformat:'s' %}checked{% endif %}>
+                                <label for="screen-{{ application.pk }}">
+                                    <strong>{{ application.applicant_name }}</strong>
+                                    <small>{{ application.applicant_email }}</small>
+                                    <small>{{ application.get_status_display }} · Applied {{ application.applied_date|date:'M j, Y' }}</small>
+                                </label>
+                                <form method="post" class="application-status-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="update_application_status">
+                                    <input type="hidden" name="application_id" value="{{ application.pk }}">
+                                    <label class="visually-hidden" for="status-{{ application.pk }}">Change status for {{ application.applicant_name }}</label>
+                                    <select id="status-{{ application.pk }}" name="status">
+                                        {% for value, label in status_choices %}
+                                            <option value="{{ value }}" {% if value == application.status %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="secondary" type="submit">Save</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-state" style="padding: 0 22px 22px;">No applications for this job.</p>
+                {% endif %}
+            </div>
+
+            <div id="screened-applications-panel" class="sidebar-panel">
+                <div class="section-heading selection-summary">
+                    <h2>Screened applications</h2>
+                    <span class="section-count">{{ applications|length }}</span>
+                </div>
+
+                {% if applications %}
+                    <ul class="application-list">
+                        {% for application in applications %}
+                            {% if application.status == 'SCREENED' %}
+                                <li class="application-item screened-list-item">
+                                    <div class="screened-item-meta">
+                                        <strong>{{ application.applicant_name }}</strong>
+                                        <small>{{ application.applicant_email }}</small>
+                                        <small>{{ application.get_status_display }} · Screened {{ application.applied_date|date:'M j, Y' }}</small>
+                                    </div>
+                                    <a class="btn view-results-button" href="{% url 'dashboard_review_results' job_id=job.pk %}">View results</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-state" style="padding: 0 22px 22px;">No screened applications for this job.</p>
+                {% endif %}
+            </div>
+        </div>
+    </aside>
+</div>
+
+<section id="review-stage" class="screening-stage" hidden>
+    <button id="back-to-selection" class="btn back-to-selection" type="button">Back to selection</button>
+    <div id="review-workspace" class="review-workspace">
+        <aside id="job-pane" class="screening-pane job-pane"><button id="toggle-job" class="btn pane-toggle" type="button">Hide job</button><p class="eyebrow">Job details</p><h2>{{ job.title }}</h2><p>{{ job.description }}</p><p><strong>{{ job.location }}</strong><br>{{ job.salary }}<br>Apply by {{ job.deadline|date:'F j, Y' }}</p></aside>
+        <main class="screening-pane"><div class="review-controls"><div><p class="eyebrow">Stage 2 · Requirement review</p><h2 id="selected-name">Select an application</h2></div><span id="selected-score" class="overall-score"></span></div><div id="overall-review" class="overall-review" hidden><h3>Overall assessment</h3><p id="overall-comments"></p></div><div id="requirement-reviews" class="requirement-reviews">{% for criterion in job.criteria.all %}{% for requirement in criterion.requirements.all %}<article class="requirement-review" data-requirement-id="{{ requirement.pk }}"><h3 class="requirement-title">{{ requirement.description }}</h3><p class="review-empty">Select an application to see the AI assessment.</p></article>{% empty %}<p class="empty-state">No requirements configured.</p>{% endfor %}{% empty %}<p class="empty-state">No criteria configured.</p>{% endfor %}</div></main>
+        <aside class="screening-pane application-pane"><div class="section-heading"><h2>Screened applications</h2><span id="screened-count" class="section-count">0</span></div><ul id="review-application-list" class="application-list"></ul><div class="selection-actions"><span id="review-status" class="screening-status" role="status"></span><span id="screening-loader" class="screening-loader"><span class="spinner" aria-hidden="true"></span>Screening...</span></div></aside>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+const jobId = {{ job.pk }};
+const selectionStage = document.getElementById('selection-stage');
+const reviewStage = document.getElementById('review-stage');
+const choices = [...document.querySelectorAll('.screen-choice')];
+const selectAll = document.getElementById('select-all');
+const selectionCount = document.getElementById('selection-count');
+const selectionCountRail = document.getElementById('selection-count-rail');
+const selectionStatus = document.getElementById('selection-status');
+const reviewStatus = document.getElementById('review-status');
+const runButton = document.getElementById('run-screening');
+const stopButton = document.getElementById('stop-screening');
+const runButtonRail = document.getElementById('run-screening-rail');
+const selectionLoader = document.getElementById('selection-loader');
+const reviewList = document.getElementById('review-application-list');
+let activeScreeningController = null;
+
+function setScreeningRunning(isRunning) {
+    if (runButton) runButton.hidden = isRunning;
+    if (stopButton) stopButton.hidden = !isRunning;
+    if (selectionLoader) selectionLoader.classList.toggle('is-visible', isRunning);
+}
+
+if (runButton && !{{ job.criteria.exists|yesno:'true,false' }}) {
+    runButton.disabled = true;
+    runButton.title = 'Add at least one criterion before screening.';
+}
+if (runButtonRail && !{{ job.criteria.exists|yesno:'true,false' }}) {
+    runButtonRail.disabled = true;
+    runButtonRail.title = 'Add at least one criterion before screening.';
+}
+const screenedCount = document.getElementById('screened-count');
+const requirementReviews = [...document.querySelectorAll('[data-requirement-id]')];
+const selectedName = document.getElementById('selected-name');
+const selectedScore = document.getElementById('selected-score');
+const overallReview = document.getElementById('overall-review');
+const overallComments = document.getElementById('overall-comments');
+
+function updateSelectionCount() {
+    const count = choices.filter((choice) => choice.checked).length;
+    if (selectionCount) selectionCount.textContent = `${count} selected`;
+    if (selectionCountRail) selectionCountRail.textContent = `${count} selected`;
+}
+choices.forEach((choice) => choice.addEventListener('change', updateSelectionCount));
+selectAll?.addEventListener('change', () => { choices.forEach((choice) => { choice.checked = selectAll.checked; }); updateSelectionCount(); });
+
+function showScreening(screening, applicationName) {
+    selectedName.textContent = applicationName;
+    selectedScore.textContent = screening ? `${screening.overall_score}%` : '';
+    overallReview.hidden = !screening;
+    if (screening) overallComments.textContent = screening.overall_comments;
+    requirementReviews.forEach((review) => {
+        const result = screening?.criteria.find((item) => String(item.requirement_id) === review.dataset.requirementId);
+        review.querySelector('.review-empty')?.remove(); review.querySelector('.review-content')?.remove();
+        if (!result) { const empty = document.createElement('p'); empty.className = 'review-empty'; empty.textContent = screening ? 'No AI assessment was returned for this requirement.' : 'Select an application to see the AI assessment.'; review.appendChild(empty); return; }
+        const score = Math.max(0, Math.min(100, Number(result.score))); const assessment = String(result.assessment).toLowerCase(); const content = document.createElement('div'); content.className = 'review-content';
+        content.innerHTML = `<div class="review-assessment"><span class="assessment assessment-${assessment}">${assessment.replaceAll('_', ' ')}</span><span class="score">${score}%</span></div><div class="score-bar"><div class="score-bar-fill" style="width:${score}%"></div></div><p class="review-evidence">${result.evidence}</p>`; review.appendChild(content);
+    });
+}
+
+async function loadApplicationReview(applicationId, applicationName, button) {
+    const response = await fetch(`/dashboard/review/job/${jobId}/application/${applicationId}/`); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Could not load this review.');
+    document.querySelectorAll('.review-application').forEach((item) => item.classList.remove('is-selected')); button?.classList.add('is-selected'); showScreening(data.screening, applicationName);
+}
+
+function showReviewStage(results) {
+    reviewList.innerHTML = ''; screenedCount.textContent = results.length;
+    results.forEach((result) => { const item = document.createElement('li'); item.className = 'application-item'; item.innerHTML = `<button class="review-application" data-application-id="${result.application_id}" type="button"><strong>${result.applicant_name}</strong><small>Screened · Score ${result.overall_score}%</small></button>`; const button = item.querySelector('button'); button.addEventListener('click', async () => { reviewStatus.textContent = 'Loading review...'; try { await loadApplicationReview(result.application_id, result.applicant_name, button); reviewStatus.textContent = ''; } catch (error) { reviewStatus.textContent = error.message; } }); reviewList.appendChild(item); });
+    selectionStage.hidden = true; reviewStage.hidden = false; reviewStage.scrollIntoView({behavior: 'smooth', block: 'start'});
+    const first = reviewList.querySelector('.review-application'); first?.click();
+}
+
+const criteriaToggleButton = document.getElementById('toggle-criteria-form');
+const criteriaFormWrapper = document.getElementById('criteria-form-wrapper');
+const cancelCriteriaButton = document.getElementById('cancel-criteria-form');
+
+function closeCriteriaMenus() {
+    document.querySelectorAll('.criteria-menu').forEach((menu) => {
+        menu.hidden = true;
+        const toggle = menu.previousElementSibling;
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    });
+}
+
+criteriaToggleButton?.addEventListener('click', () => {
+    const isOpen = criteriaFormWrapper.classList.toggle('is-open');
+    criteriaFormWrapper.hidden = !isOpen;
+    criteriaToggleButton.textContent = isOpen ? 'Hide add criteria' : 'Add criteria';
+});
+
+cancelCriteriaButton?.addEventListener('click', () => {
+    criteriaFormWrapper.classList.remove('is-open');
+    criteriaFormWrapper.hidden = true;
+    criteriaToggleButton.textContent = 'Add criteria';
+});
+
+document.querySelectorAll('.sidebar-tab').forEach((button) => {
+    button.addEventListener('click', () => {
+        const targetId = button.dataset.target;
+        document.querySelectorAll('.sidebar-tab').forEach((tab) => {
+            const isActive = tab === button;
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-pressed', String(isActive));
+        });
+        document.querySelectorAll('.sidebar-panel').forEach((panel) => panel.classList.toggle('is-active', panel.id === targetId));
+    });
+});
+
+document.querySelectorAll('.criteria-menu-toggle').forEach((button) => {
+    button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const menu = button.nextElementSibling;
+        const isOpen = !menu.hidden;
+        closeCriteriaMenus();
+        if (!isOpen) {
+            menu.hidden = false;
+            button.setAttribute('aria-expanded', 'true');
+        }
+    });
+});
+
+document.querySelectorAll('.criteria-menu-action[data-action="edit"]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const item = button.closest('.criteria-item');
+        const form = item.querySelector('.criteria-edit-form');
+        closeCriteriaMenus();
+        form.classList.add('is-open');
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+});
+
+document.querySelectorAll('.criteria-cancel-edit').forEach((button) => {
+    button.addEventListener('click', () => {
+        const form = button.closest('.criteria-edit-form');
+        form.classList.remove('is-open');
+    });
+});
+
+document.addEventListener('click', (event) => {
+    if (!event.target.closest('.criteria-menu-toggle') && !event.target.closest('.criteria-menu')) {
+        closeCriteriaMenus();
+    }
+});
+
+stopButton?.addEventListener('click', () => {
+    if (activeScreeningController) {
+        activeScreeningController.abort();
+    }
+    activeScreeningController = null;
+    setScreeningRunning(false);
+    selectionStatus.textContent = 'Screening stopped. You can start again.';
+});
+
+runButton?.addEventListener('click', async () => {
+    const applicationIds = choices.filter((choice) => choice.checked).map((choice) => Number(choice.value));
+    if (!applicationIds.length) {
+        selectionStatus.textContent = 'Select at least one application.';
+        return;
+    }
+
+    if (activeScreeningController) {
+        activeScreeningController.abort();
+    }
+
+    const controller = new AbortController();
+    activeScreeningController = controller;
+    setScreeningRunning(true);
+    selectionStatus.textContent = 'Preparing screening results...';
+    const resultsUrl = `/dashboard/review/job/${jobId}/results/?loading=1`;
+
+    try {
+        const response = await fetch(`/dashboard/review/job/${jobId}/stream/`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            body: JSON.stringify({job_id: jobId, application_ids: applicationIds}),
+            signal: controller.signal,
+        });
+
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || 'Screening failed.');
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) {
+            throw new Error('The browser could not start the screening stream.');
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            if (controller.signal.aborted) {
+                throw new DOMException('Screening aborted.', 'AbortError');
+            }
+
+            const { value, done } = await reader.read();
+            if (controller.signal.aborted) {
+                throw new DOMException('Screening aborted.', 'AbortError');
+            }
+            if (done) {
+                break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+                const text = line.trim();
+                if (!text) continue;
+
+                const event = JSON.parse(text);
+                if (event.type === 'candidate_started') {
+                    selectionStatus.textContent = `Screening ${event.applicant_name || 'candidate'}...`;
+                    continue;
+                }
+                if (event.type === 'requirement_started') {
+                    selectionStatus.textContent = `Evaluating requirement: ${event.requirement_title || 'Requirement'}...`;
+                    continue;
+                }
+                if (event.type === 'requirement_done') {
+                    selectionStatus.textContent = 'Updating the screening result...';
+                    continue;
+                }
+                if (event.type === 'candidate_done') {
+                    selectionStatus.textContent = 'Saving screening result...';
+                    continue;
+                }
+                if (event.type === 'error') {
+                    throw new Error(event.error || 'Screening failed.');
+                }
+                if (event.type === 'all_done') {
+                    window.location.href = resultsUrl;
+                    return;
+                }
+            }
+        }
+
+        if (buffer.trim()) {
+            const event = JSON.parse(buffer.trim());
+            if (event.type === 'error') {
+                throw new Error(event.error || 'Screening failed.');
+            }
+            if (event.type === 'all_done') {
+                window.location.href = resultsUrl;
+                return;
+            }
+        }
+
+        window.location.href = resultsUrl;
+    } catch (error) {
+        if (error.name === 'AbortError' || controller.signal.aborted) {
+            selectionStatus.textContent = 'Screening stopped. You can start again.';
+            setScreeningRunning(false);
+            return;
+        }
+
+        selectionStatus.textContent = error.message;
+        setScreeningRunning(false);
+    } finally {
+        if (activeScreeningController === controller) {
+            activeScreeningController = null;
+        }
+    }
+});
+
+document.getElementById('toggle-job')?.addEventListener('click', (event) => { const workspace = document.getElementById('review-workspace'); workspace.classList.toggle('job-hidden'); event.currentTarget.textContent = workspace.classList.contains('job-hidden') ? 'Show job' : 'Hide job'; });
+document.getElementById('back-to-selection')?.addEventListener('click', () => { reviewStage.hidden = true; selectionStage.hidden = false; });
+</script>
+{% endblock %}

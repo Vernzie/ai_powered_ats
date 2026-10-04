@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Application Review{% endblock %} | Telikom ATS</title>
+    <link rel="stylesheet" href="{% static 'ats_dashboard_v4/css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'ats_dashboard_v4/css/django.css' %}">
+    <link rel="stylesheet" href="{% static 'ats_dashboard_v4/css/brand.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'ats_dashboard_v4/css/review.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'workspace/css/sidebar-toggle.css' %}?v=1">
+</head>
+<body data-page="review">
+    <div class="shell{% if sidebar_collapsed_default %} sidebar-collapsed{% endif %}">
+        <aside class="sidebar" id="dashboard-sidebar" aria-label="Dashboard navigation">
+            <div class="brand">
+                <div class="brandmark" role="img" aria-label="Telikom logo">T</div>
+                <div><strong>Telikom ATS</strong><small>Recruitment workspace</small></div>
+            </div>
+            <nav class="nav" aria-label="Main navigation">
+                <div class="navlabel">Hiring</div>
+                <a class="navitem" href="{% url 'dashboard' %}"><span>▦</span>Overview</a>
+                <a class="navitem" href="{% url 'dashboard_jobs' %}"><span>▤</span>Jobs</a>
+                <a class="navitem" href="{% url 'dashboard_applications' %}"><span>◫</span>Applications</a>
+                <a class="navitem" href="{% url 'dashboard_interviews' %}"><span>□</span>Interviews</a>
+                <div class="navlabel workspace-navlabel">Workspace</div>
+                <a class="navitem" href="{% url 'dashboard_workspace' %}"><span>▣</span>Workspace</a>
+            </nav>
+            <div class="sidebarfoot">
+                <div class="status"><i></i> All systems operational</div>
+                <div class="miniuser">
+                    <div class="avatar">{{ request.user.username|first|upper }}</div>
+                    <div><strong>{{ request.user.get_full_name|default:request.user.username }}</strong><small>Administrator</small></div>
+                </div>
+            </div>
+        </aside>
+        <button
+            type="button"
+            id="review-sidebar-toggle"
+            class="global-sidebar-toggle{% if sidebar_collapsed_default %} is-collapsed{% endif %}"
+            aria-controls="dashboard-sidebar"
+            aria-expanded="{% if sidebar_collapsed_default %}false{% else %}true{% endif %}"
+            aria-label="{% if sidebar_collapsed_default %}Expand{% else %}Collapse{% endif %} dashboard sidebar"
+            title="{% if sidebar_collapsed_default %}Expand{% else %}Collapse{% endif %} dashboard sidebar"
+        >
+            <span class="visually-hidden">Toggle dashboard sidebar</span>
+        </button>
+        <main class="main">
+            <header class="topbar">
+                <div class="crumb"><a href="{% url 'dashboard' %}">Workspace</a><b>/</b>{% block breadcrumb %}Application Review{% endblock %}</div>
+                <div class="topright">
+                    <label class="search">⌕ <input placeholder="Search jobs, candidates..."></label>
+                    <div class="avatar">{{ request.user.username|first|upper }}</div>
+                </div>
+            </header>
+            <div class="content">
+                {% if messages %}
+                    <div class="review-messages" role="status">
+                        {% for message in messages %}<p class="{{ message.tags }}">{{ message }}</p>{% endfor %}
+                    </div>
+                {% endif %}
+                {% block dashboard_content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <script src="{% static 'workspace/js/sidebar-toggle.js' %}?v=1" defer></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

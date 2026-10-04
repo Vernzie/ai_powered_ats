@@ -1,0 +1,114 @@
+{% extends 'dashboard/atlas_shell.html' %}
+{% load static %}
+
+{% block title %}Review {{ application.applicant_name }}{% endblock %}
+{% block breadcrumb %}<a href="{{ workspace_url }}">Workspace</a><b>/</b>{{ job.title }}<b>/</b>Application review{% endblock %}
+
+{% block dashboard_content %}
+<link rel="stylesheet" href="{% static 'workspace/css/application-review.css' %}?v=3">
+<main class="application-review-page" id="application-review">
+    <header class="application-review-heading">
+        <div>
+            <p class="eyebrow">APPLICATION REVIEW</p>
+            <h1>{{ application.applicant_name }}</h1>
+            <p>{{ job.title }} · {{ application.applicant_email }}</p>
+        </div>
+        <a class="review-back-link" id="application-review-back-link" href="{{ workspace_url }}">Back to workspace</a>
+    </header>
+
+    {% if review_errors %}
+        <div class="review-alert" role="alert">
+            {% for error in review_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="application-review-layout">
+        <section class="review-card resume-card" aria-labelledby="resume-heading">
+            <header class="review-card-heading">
+                <div><p class="eyebrow">CANDIDATE DOCUMENT</p><h2 id="resume-heading">Resume</h2></div>
+            </header>
+            {% if resume_exists and resume_is_pdf %}
+                <object class="resume-frame" data="{{ resume_url }}" type="application/pdf" aria-label="Resume for {{ application.applicant_name }}">
+                    <iframe class="resume-frame" src="{{ resume_url }}" title="Resume for {{ application.applicant_name }}">
+                        <p>PDF preview is unavailable. <a href="{{ resume_url }}">Open the resume</a>.</p>
+                    </iframe>
+                </object>
+            {% elif resume_exists %}
+                <div class="resume-preview-fallback">
+                    <strong>Preview this document in a separate window</strong>
+                    <p>This file format may not display in the embedded viewer.</p>
+                    <a class="review-secondary-button" href="{{ resume_url }}" target="_blank" rel="noopener">Open or download resume</a>
+                </div>
+            {% else %}
+                <div class="resume-preview-fallback" role="alert">
+                    <strong>Resume file unavailable</strong>
+                    <p>Re-upload the candidate's resume before completing a review.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="review-card criteria-card" aria-labelledby="requirements-heading">
+            <header class="review-card-heading criteria-card-heading">
+                <div><p class="eyebrow">JOB REQUIREMENTS</p><h2 id="requirements-heading">Review criteria</h2></div>
+                <button class="review-secondary-button" id="run-ai-review" type="button" aria-busy="false" {% if not resume_exists or not review_groups %}disabled{% endif %}><span class="ai-review-spinner" aria-hidden="true"></span><span class="ai-review-button-label">Use AI to fill scores</span></button>
+            </header>
+
+            {% if reviewed_by_label %}<p class="previous-reviewer">Previously screened/reviewed by <strong>{{ reviewed_by_label }}</strong></p>{% endif %}
+            <p class="review-helper">Score each requirement and select an assessment. Add evidence from the resume. AI suggestions can be edited before submission.</p>
+            <p class="review-feedback" id="review-feedback" role="status" aria-live="polite"></p>
+            <p class="review-overall-score" id="review-overall-score" aria-live="polite" {% if overall_score == None %}hidden{% endif %}>Overall score: <strong id="review-overall-score-value">{{ overall_score|default_if_none:"" }}</strong><span>%</span></p>
+
+            <form id="application-review-form" method="post" action="{{ review_url }}?application={{ application.pk }}" data-ai-url="{{ ai_screen_url }}" data-screened-url="{{ screened_workspace_url }}" data-resume-available="{{ resume_exists|yesno:'true,false' }}">
+                {% csrf_token %}
+                <input type="hidden" name="application_id" value="{{ application.pk }}">
+                <input type="hidden" name="review_method" id="review-method" value="{{ review_method }}">
+                <input type="hidden" name="file_id" id="review-file-id" value="{{ file_id }}">
+
+                {% if review_groups %}
+                    {% for group in review_groups %}
+                        <section class="review-criterion-group">
+                            <h3>{{ group.name }}</h3>
+                            {% for item in group.requirements %}
+                                <article class="review-requirement" data-requirement-id="{{ item.id }}">
+                                    <div class="review-requirement-title">
+                                        <h4>{{ item.description }}</h4>
+                                        {% if item.required %}<span class="required-label">Required</span>{% else %}<span class="optional-label">Optional</span>{% endif %}
+                                    </div>
+                                    <div class="review-requirement-fields">
+                                        <label class="review-field review-score-field">Score
+                                            <span class="score-input-wrap"><input class="requirement-score" type="number" name="score_{{ item.id }}" min="0" max="100" step="1" value="{{ item.score }}" required inputmode="numeric"><span>/ 100</span></span>
+                                        </label>
+                                        <label class="review-field">Assessment
+                                            <select class="requirement-assessment" name="assessment_{{ item.id }}" required>
+                                                <option value="" disabled {% if not item.assessment %}selected{% endif %}>Choose assessment</option>
+                                                {% for value, label in assessment_choices %}<option value="{{ value }}" {% if item.assessment == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <label class="review-field review-evidence-field">Evidence or reviewer notes
+                                        <textarea name="evidence_{{ item.id }}" rows="2">{{ item.evidence }}</textarea>
+                                    </label>
+                                </article>
+                            {% endfor %}
+                        </section>
+                    {% endfor %}
+                {% else %}
+                    <div class="review-alert" role="alert">This job has no requirements to review yet.</div>
+                {% endif %}
+
+                <label class="review-field overall-comments-field">Overall review comments
+                    <textarea name="overall_comments" rows="3">{{ overall_comments }}</textarea>
+                </label>
+
+                <footer class="review-form-footer">
+                    <button class="review-submit-button" id="send-to-screened" type="submit" {% if not review_groups or not resume_exists %}disabled{% endif %}>Send to screened</button>
+                </footer>
+            </form>
+        </section>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'workspace/js/application-review.js' %}?v=3" defer></script>
+{% endblock %}

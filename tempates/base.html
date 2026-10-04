@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Open roles{% endblock %} | Workroom</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+    <style>
+        :root {
+            --ink: #17222b;
+            --muted: #66737b;
+            --paper: #f7f5ef;
+            --surface: #fffdf8;
+            --line: #deddd6;
+            --accent: #0b5bcc;
+            --accent-dark: #083f9b;
+            --soft-accent: #dfeafc;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: Georgia, 'Times New Roman', serif;
+            line-height: 1.5;
+        }
+
+        a { color: inherit; }
+
+        .site-header {
+            align-items: center;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            margin: 0 auto;
+            max-width: 1180px;
+            padding: 24px 28px;
+        }
+
+        .brand {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+            text-decoration: none;
+        }
+
+        .brand-mark { color: var(--accent); }
+
+        .header-actions {
+            align-items: center;
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-button {
+            border: 1px solid var(--line);
+            color: var(--ink);
+            font-family: Arial, sans-serif;
+            font-size: .78rem;
+            font-weight: 700;
+            padding: 9px 14px;
+            text-decoration: none;
+        }
+
+        .header-button:hover { border-color: var(--accent); color: var(--accent-dark); }
+
+        .header-button--register {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fffdf8;
+        }
+
+        .header-button--register:hover { background: var(--accent-dark); color: #fffdf8; }
+
+        .header-user {
+            color: var(--muted);
+            font-family: Arial, sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+        }
+
+        .header-logout {
+            border: 1px solid var(--line);
+            color: var(--ink);
+            font-family: Arial, sans-serif;
+            font-size: .78rem;
+            font-weight: 700;
+            padding: 9px 14px;
+            text-decoration: none;
+        }
+
+        .header-logout:hover { border-color: var(--accent); color: var(--accent-dark); }
+
+        main { min-height: calc(100vh - 170px); }
+
+        .site-footer {
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-family: Arial, sans-serif;
+            font-size: .8rem;
+            margin: 64px auto 0;
+            max-width: 1180px;
+            padding: 24px 28px 32px;
+        }
+
+        @media (max-width: 600px) {
+            .site-header { padding: 20px; }
+            .site-footer { padding-left: 20px; padding-right: 20px; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="{% url 'home' %}"><span class="brand-mark">/</span> workroom</a>
+        <nav class="header-actions" aria-label="Account actions">
+            {% if request.user.is_authenticated %}
+                <span class="header-user">Hi, {{ request.user.username }}</span>
+                <a class="header-logout" href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a class="header-button" href="{% url 'login' %}">Login</a>
+                <a class="header-button header-button--register" href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer class="site-footer">
+        <span>Workroom</span> · Find work with room to grow.
+    </footer>
+    <script src="{% static 'js/site.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

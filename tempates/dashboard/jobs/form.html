@@ -1,0 +1,27 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{% if editing_job %}Edit job{% else %}Create job{% endif %} | Admin dashboard{% endblock %}
+
+{% block dashboard_content %}
+<header class="dashboard-heading"><div><p class="eyebrow">Job management</p><h1>{% if editing_job %}Edit job{% else %}Create a new job{% endif %}</h1></div></header>
+<section class="section-block"><div class="panel" style="padding:22px"><form class="job-form" method="post">{% csrf_token %}{% for field in form %}<div class="field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endfor %}<h2>Requirements</h2><p>Add one or more requirements before continuing.</p>{% if editing_job %}<div class="existing-requirements"><h3>Current requirements</h3>{% if existing_requirements %}<ul>{% for requirement in existing_requirements %}<li style="align-items:center;display:flex;justify-content:space-between;gap:12px;"><span>{{ requirement.description }}{% if requirement.required %} (Required){% else %} (Nice to have){% endif %}</span><button class="btn" formaction="{% url 'requirement_delete' job_pk=editing_job.pk pk=requirement.pk %}" formmethod="post" type="submit">Remove</button></li>{% endfor %}</ul>{% else %}<p>No requirements attached yet.</p>{% endif %}</div><button class="btn" id="show-requirements" type="button">Add requirements</button><div id="new-requirements" hidden><h3>Add new requirements</h3>{{ requirement_formset.management_form }}<div id="requirements-list">{% for requirement_form in requirement_formset %}<div class="requirement-row field">{{ requirement_form.description.label_tag }}{{ requirement_form.description }}{{ requirement_form.description.errors }}{{ requirement_form.required }} {{ requirement_form.required.label_tag }}</div>{% endfor %}</div><button class="btn" name="action" value="add_requirements" type="submit">Save requirements</button></div>{% else %}{{ requirement_formset.management_form }}<div id="requirements-list">{% for requirement_form in requirement_formset %}<div class="requirement-row field">{{ requirement_form.description.label_tag }}{{ requirement_form.description }}{{ requirement_form.description.errors }}{{ requirement_form.required }} {{ requirement_form.required.label_tag }}</div>{% endfor %}</div><button class="btn" id="add-requirement" type="button">Add requirement</button>{% endif %}<div class="form-actions"><a class="btn" href="{% url 'dashboard_jobs' %}">Cancel</a><button class="submit-button" type="submit">Save and next</button></div></form></div></section>
+<script>
+const addButton = document.getElementById('add-requirement');
+const showRequirementsButton = document.getElementById('show-requirements');
+const newRequirements = document.getElementById('new-requirements');
+const list = document.getElementById('requirements-list');
+const totalForms = document.getElementById('id_requirements-TOTAL_FORMS');
+if (showRequirementsButton) showRequirementsButton.addEventListener('click', () => {
+	newRequirements.hidden = false;
+	showRequirementsButton.hidden = true;
+});
+if (addButton) addButton.addEventListener('click', () => {
+	const index = Number(totalForms.value);
+	const row = document.querySelector('.requirement-row').cloneNode(true);
+	row.innerHTML = row.innerHTML.replaceAll('-0-', `-${index}-`).replaceAll('id_requirements-0-', `id_requirements-${index}-`);
+	row.querySelectorAll('input').forEach((input) => { input.value = input.type === 'checkbox' ? '' : ''; input.checked = input.type === 'checkbox'; });
+	list.appendChild(row);
+	totalForms.value = index + 1;
+});
+</script>
+{% endblock %}
