@@ -1,3 +1,4 @@
+
 """
 Django settings for _core project.
 
@@ -11,23 +12,35 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env
 load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^ezd3x)nrc@c9hfb92_jfs%%q#)z25es&ur2y1=e#v&kp-!o)k'
+SECRET_KEY = os.getenv('SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+]
+
+
 LOGIN_URL = '/login/'
 
 
@@ -40,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'job_application',
     'workspace.apps.WorkspaceConfig',
     'users',
@@ -47,6 +61,7 @@ INSTALLED_APPS = [
     'pipeline',
     'interviews.apps.InterviewsConfig',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,7 +73,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = '_core.urls'
+
 
 TEMPLATES = [
     {
@@ -75,12 +92,14 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = '_core.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# SQLite is sufficient for this PoC/demo deployment.
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -124,7 +143,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # Email
