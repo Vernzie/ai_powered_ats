@@ -1,0 +1,67 @@
+OPENAI API COST ESTIMATE
+
+Purpose
+Estimate how many applications a $5 API budget could support when AI is used for resume screening, interview-question preparation, interview transcription, and final interview analysis. These are planning estimates, not a guaranteed quote. Actual usage depends on resume length, job criteria, prompts, generated response length, and interview duration.
+
+Important: $5 does not equal a fixed one-million-token allowance. API usage is billed by model and task. At the rates used below, $5 would buy about 12.5 million input tokens or 3.125 million output tokens if used only for that token type. Audio transcription is estimated separately by audio minute. A ChatGPT subscription is separate from API billing; these calculations assume the $5 is available as API budget or credit.
+
+Pricing and Project Assumptions
+- Resume screening and interview-question generation use GPT-4.1 mini in the current project.
+- GPT-4.1 mini standard rates used: $0.40 per 1 million input tokens and $1.60 per 1 million output tokens.
+- Transcription estimate: GPT-4o mini transcribe at approximately $0.003 per audio minute.
+- Average resume: about 600 words, or roughly 800 tokens of resume text. Screening and question prompts also include job details, criteria, and instructions.
+- Interview questions: five questions with expected-answer guidance.
+- Interview: 30 minutes of recorded speech per candidate.
+- Final analysis: transcript plus questions, expected answers, and job context, estimated at 8,000 input tokens and 1,000 output tokens.
+- Token counts below are rounded estimates. Transcription is priced by audio duration in this estimate, not by counting the transcript as a separate transcription-token charge. The transcript is included again as model input for final analysis.
+
+Estimated Cost Per Candidate: Full AI Process
+
+Stage 1 - Resume screening
+Estimated usage: 2,800 input tokens + 600 output tokens
+Calculation: (2,800 x $0.40 + 600 x $1.60) / 1,000,000
+Estimated cost: $0.00208 per resume
+
+Stage 2 - Interview-question generation
+Estimated usage: 2,500 input tokens + 1,000 output tokens
+Calculation: (2,500 x $0.40 + 1,000 x $1.60) / 1,000,000
+Estimated cost: $0.00260 per candidate
+
+Stage 3 - Interview transcription
+Estimated duration: 30 minutes
+Calculation: 30 x $0.003
+Estimated cost: $0.09000 per interview
+
+Stage 4 - Final interview analysis
+Estimated usage: 8,000 input tokens + 1,000 output tokens
+Calculation: (8,000 x $0.40 + 1,000 x $1.60) / 1,000,000
+Estimated cost: $0.00480 per candidate
+
+Estimated full-process total: $0.09948, or about $0.10 per candidate.
+
+What $5 Could Cover
+If every applicant completes every AI step, including a 30-minute transcribed interview:
+- 100 applications would cost about $9.95.
+- $5 would cover about 50 complete candidate cycles.
+- This is approximately 50 resumes screened, 50 question sets prepared, and 50 interviews transcribed and assessed.
+
+A More Selective Hiring Funnel
+Usually, not every applicant reaches interview. If all 100 applicants receive AI screening but only 10 (10%) proceed to question generation, interview transcription, and final analysis:
+- Screen 100 resumes: 100 x $0.00208 = $0.208
+- Prepare questions, transcribe, and analyze 10 interviews: 10 x ($0.00260 + $0.09000 + $0.00480) = $0.974
+- Estimated total for 100 initial applications: $1.182
+- At the same selection rate and interview length, $5 could support roughly 420 initial applications.
+
+How Manual Steps Change the Estimate
+- Manual resume review avoids the estimated $0.00208 AI screening cost for each application handled manually.
+- Manually preparing interview questions avoids about $0.00260 for each candidate who would otherwise receive AI-generated questions.
+- If an interviewer handles notes and assessment manually, the API may avoid both transcription and final AI analysis, saving about $0.09480 per 30-minute interview. This shifts work to the hiring team rather than making it disappear.
+- Screening everyone but using AI transcription and analysis only for shortlisted candidates is the largest practical cost control. For example, a 10% interview rate changes the estimate from about 50 full-cycle applicants to about 420 initial applicants per $5.
+
+Limitations
+The estimate excludes taxes, retries, unusually long resumes or interviews, multiple question-generation attempts, and any other API features or storage charges. Long interviews increase transcription cost linearly: each additional 10 minutes adds about $0.03 at the assumed transcription rate. Actual costs should be checked against the API usage dashboard after a small pilot. Interview scores should support human review and should not make the hiring decision automatically.
+
+Implementation note: Resume screening and interview-question generation are present in the project. Interview transcription and final interview-answer analysis are planned features, so their prices here are projections using the stated model assumptions, not measured project usage.
+
+Pricing source (checked October 5, 2026):
+https://developers.openai.com/api/docs/pricing

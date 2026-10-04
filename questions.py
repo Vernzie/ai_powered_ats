@@ -47,7 +47,7 @@ def get_client():
     """Create the OpenAI client on first use so imports do not require credentials."""
     global _client
     if _client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
             raise RuntimeError("OPENAI_API_KEY is missing from the environment or adjacent .env file.")
         _client = OpenAI(api_key=api_key)

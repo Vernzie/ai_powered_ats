@@ -1,6 +1,6 @@
-# ai/config.py
+import os
 
-AI_API_KEY = "YOUR_API_KEY_HERE"
+AI_API_KEY = os.environ.get("OPENAI_API_KEY")
 AI_MODEL = "YOUR_MODEL_HERE"
 AI_TEMPERATURE = 0.2
 AI_MAX_TOKENS = 4000

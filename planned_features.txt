@@ -1,0 +1,38 @@
+PLANNED FEATURES REPORT
+
+Status: The features below are proposed and are not yet implemented. They describe possible extensions to the current ATS and are intended to support, not replace, recruiter and hiring-team decisions.
+
+1. Flexible Recruitment Workflows
+The ATS could offer three configurable workflow modes for each job:
+- Fully Automated: When an application is submitted, the system immediately starts the configured processing steps, such as resume screening against job requirements, recording results, and moving the application according to agreed rules.
+- Semi-Automated: The system automates selected steps, while recruiters review or approve other stages. For example, AI could score applications while a recruiter decides which candidates to shortlist or interview.
+- Manual: Recruiters manage the process themselves, including reviewing applications, recording assessments, and updating candidate stages.
+Outcome: Organizations can choose the right balance of speed, automation, and human review for each role, while keeping applications organized in a consistent pipeline.
+
+2. Interview Transcription and Weighted Answer Assessment
+After an interview, recorded speech could be transcribed into text using an OpenAI transcription service. The system could associate answers with the prepared interview questions and compare each answer with its expected-answer guidance. AI could suggest a score and supporting evidence for each answer; question weights would contribute to a combined interview score. Interviewers could review and adjust the transcript and scores before deciding whether to progress or hire a candidate.
+Outcome: Reduces manual note-taking and helps the hiring panel compare interview evidence against consistent, role-related criteria. The final decision remains with the hiring team.
+
+3. Desktop Interview Recording and Voice Input
+A companion desktop application could make interview capture more efficient by using the computer's microphone and operating-system audio capabilities. Interviewers could record an interview in the app or provide voice input, then send the audio for transcription through the OpenAI API. The app could connect the transcript to the candidate, job, and interview questions in the ATS. Recording consent, access restrictions, and audio retention would need to be addressed.
+Outcome: Makes it easier to capture interview answers accurately and move them into the assessment workflow without relying on manual transcription.
+
+4. AI Candidate-Information Chat
+Recruiters could ask questions in a normal chat interface, such as whether a candidate's resume shows evidence of a particular job requirement. With permission, the assistant could use tools to retrieve relevant resume information, job requirements, screening results, or interview notes. Responses should cite or summarize the supporting evidence and identify when information is missing; recruiters could use the assistant before shortlisting, choosing interview candidates, or making a hiring decision.
+Outcome: Helps recruiters find and compare relevant candidate information faster, without replacing the underlying records or the recruiter's judgment.
+
+5. Bulk Candidate Email
+Recruiters could select a group of candidates and send a shared email for updates such as interview invitations, next steps, or process changes. The system could support reusable templates, candidate-specific details, recipient review, and a final preview before sending.
+Outcome: Saves time when communicating with multiple candidates and helps keep messages timely and consistent, while reducing the risk of contacting the wrong recipients.
+
+6. Email Notifications
+The system could send notifications for important events, including a new application, an interview invitation, a candidate status update, or an approval request. Users could choose which events they want to receive and manage notification preferences.
+Outcome: Keeps recruiters and hiring stakeholders informed without requiring them to constantly check the ATS.
+
+7. Activity Logging and Audit History
+The ATS could record important actions, including who created or edited a job, reviewed or scored an application, changed a candidate's status, sent a message, or approved a decision, along with the date and time. Authorized users could view the history for a job or candidate.
+Outcome: Improves accountability and makes it easier to understand how a hiring decision or candidate-status change was made.
+
+8. User Roles and Approval Steps
+The system could support distinct roles such as recruiter, hiring manager, and approver, with access and actions appropriate to each role. Configurable approval steps could require a designated user to approve a shortlist, interview decision, or offer. An approval could be requested and recorded in the ATS, with email used to notify approvers or provide an approval link.
+Outcome: Clarifies responsibilities, gives the right stakeholders a chance to review key decisions, and provides a record of approvals throughout hiring.

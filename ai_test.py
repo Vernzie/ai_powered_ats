@@ -36,7 +36,9 @@ JOB_DETAILS_CLEANUP_INSTRUCTIONS = (
 
 # Conversation configuration
 MAX_RECENT_CHATS = 5
-API_KEY = "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"
+API_KEY = os.environ.get("OPENAI_API_KEY")
+if not API_KEY:
+    raise RuntimeError("OPENAI_API_KEY is missing from the environment or .env file.")
 
 ASSISTANT_INSTRUCTIONS = (
     "You are a helpful assistant for the HR application. "

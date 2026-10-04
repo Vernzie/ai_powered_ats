@@ -1,0 +1,21 @@
+FUNCTIONAL FEATURES REPORT
+
+1. Simple Registration and Login
+Applicants can register by providing their first and last name, username, email address, and password, then log in with their account credentials. A new account is assigned the applicant role and is signed in immediately after registration. The current flow does not require OTP or email verification.
+Outcome: Applicants can quickly create an account and proceed to job applications without waiting for an email-verification step.
+
+2. Job Creation and Publishing
+Recruiters can enter the job title, description, location, salary, and application deadline. They then add named criteria and specific requirements under each criterion, marking requirements as required or preferred. Before publishing, the recruiter chooses an automated or manual workflow; automated screening also uses a configurable score threshold. Publishing saves the criteria and activates the job for applicants to browse.
+Outcome: Each opening is published with role-specific expectations already connected to its screening process, supporting more consistent candidate assessment.
+
+3. Job Application
+Applicants can browse published jobs, open a job to review its details and requirements, and apply while signed in. The application records the applicant's contact details and is linked to the selected job. Applicants upload a resume and cover letter in PDF, DOC, or DOCX format; the new application appears in the recruiter's pipeline with a received status.
+Outcome: Applications enter a searchable, organized pipeline directly, reducing the need to monitor email, download files manually, or create separate candidate folders.
+
+4. Resume Screening and Shortlisting
+Recruiters can select an application and ask AI to assess its resume against the job's requirements. Results include a score, an assessment such as meets or partially demonstrated, and supporting evidence for each requirement, as well as an overall score and comments. Recruiters can instead enter scores and evidence manually, or review and edit AI suggestions before saving. The application then moves to the screened stage and can be filtered by status. Recruiters can select screened applications for shortlisting; in the automated workflow, the configured threshold can also determine whether screening automatically shortlists an application.
+Outcome: Reduces time spent on repetitive initial resume reviews, makes requirement-level comparisons easier, and helps recruiters build a shortlist while retaining manual oversight.
+
+5. Interview Preparation
+For a candidate moved to the interviewed stage, recruiters can open an interview-preparation page that shows the candidate's resume and existing questions. They can enter a prompt and choose how many questions to generate; AI uses the job description and candidate resume to suggest role-relevant questions. Recruiters can also create questions manually, then edit or remove questions as needed. Each question can be marked general or specific and can include an expected-answer guide and an importance weight.
+Outcome: Gives interviewers a consistent, candidate-relevant question set and reduces preparation time while allowing recruiters to customize it.
