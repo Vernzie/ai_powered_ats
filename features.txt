@@ -1,0 +1,38 @@
+JOB POSTING FEATURE
+
+Feature Overview
+The Job Posting feature lets recruiters create and manage job openings in one place, publish opportunities for applicants, and connect each role to the right recruitment workflow. A job posting also provides the structured information and evaluation criteria that downstream application screening can use.
+
+Recruiter Workflow
+1. Create a job by entering its title, description, location, salary, and application deadline.
+2. Add role-specific criteria and requirements, identifying which requirements are essential.
+3. Select the workflow for the role, such as automated, semi-automated, or manual, and configure the screening threshold when applicable.
+4. Publish or deactivate the job posting. Recruiters can review openings, search the job list, and open a job to manage its pipeline.
+5. Applicants review the job details and submit an application with their email address, resume, and cover letter.
+
+Core Capabilities
+- Centralized job details, including title, description, location, salary, posting date, deadline, and active status.
+- Role-specific criteria and required or preferred requirements to make expectations clear and support consistent screening.
+- Workflow assignment at the job level, allowing applications to follow the process selected for that opening.
+- Optional screening threshold from 0 to 100. In the automated workflow, the configured threshold can guide whether an AI-screened application is shortlisted; otherwise the default threshold is 70. Other workflows leave the status decision for review rather than automatically shortlisting based on that threshold.
+- Public job listing and detail pages, with application submission for signed-in users. Resume and cover-letter uploads accept PDF, DOC, and DOCX files.
+
+AI-Assisted Job Posting (Proposed Enhancement)
+AI can help recruiters prepare a clear, complete, and consistent posting while leaving approval and hiring decisions with people:
+- Draft or improve a job description from recruiter-provided role details.
+- Suggest responsibilities, skills, and structured criteria based on the role, clearly labeling suggestions for recruiter review.
+- Check the draft for missing information, unclear requirements, duplicate criteria, and unnecessarily restrictive or potentially biased wording.
+- Convert approved requirements into structured screening criteria that can be used later to assess applications against job-relevant evidence.
+- Recommend a workflow or screening threshold based on recruiter preferences, without silently changing settings or making hiring decisions.
+
+Human Review and Responsible Use
+Recruiters review and approve AI-generated text and criteria before publication. AI suggestions should be grounded in information supplied by the hiring team, and screening should focus on job-related qualifications and evidence. The system should not infer protected characteristics or treat an AI score as the final hiring decision. Recruiters remain responsible for the posting, workflow, and candidate decisions.
+
+Value to the Hiring Team
+- Reduces the time needed to prepare and organize job postings.
+- Makes role expectations clearer to applicants and hiring teams.
+- Connects job requirements to a consistent application-screening process.
+- Supports different hiring workflows while keeping recruiters in control.
+
+Implementation Note
+The project currently has a Job data model, public job listing and detail pages, application uploads, job-level workflow and screening-threshold fields, and AI screening behavior for applications. The dashboard's Create Job control is currently a placeholder, and AI-generated job descriptions, criteria suggestions, and bias checks are proposed capabilities rather than implemented functionality.
